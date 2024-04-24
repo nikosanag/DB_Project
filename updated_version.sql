@@ -121,26 +121,33 @@ CONSTRAINT f_key_cooks_belongs_to_national_cuisine_cooks FOREIGN KEY (cook_id) R
 );
 
 CREATE TABLE episodes_per_year(
-current_year INT(11) NOT NULL,
-episode_id INT(11) NOT NULL,
+current_year INT(11),
+episode_number INT(11),
 PRIMARY KEY(current_year,episode_number)
 );
 CREATE TABLE cooks_recipes_per_episode(
 current_year INT(11) ,
-episode_id INT(11) ,
+episode_number INT(11) ,
 rec_name VARCHAR(50),
 cook_id INT(11),
 PRIMARY KEY (current_year,episode_id,cook_id),
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
-CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_id) REFERENCES episodes_per_year(current_year,episode_id)
+CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
 ); 
 
 CREATE TABLE judges (
 current_year INT(11) ,
-episode_id INT(11) ,
+episode_number INT(11) ,
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_id,cook_id),
+PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_judges_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
-CONSTRAINT f_key_judges_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name)
+CONSTRAINT f_key_judges_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
+);
+
+CREATE TABLE evaluation(
+
+
+
+
 );
