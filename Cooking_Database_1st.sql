@@ -13,4 +13,7 @@ VALUES ('Desserts', 'Sweet recipes for everyday desserts');
 INSERT INTO belongs_to_thematic_unit
 VALUES ('Chocolate Pie', 'Desserts');
 
-SELECT * FROM belongs_to_thematic_unit;
+INSERT INTO needs_ingredient
+VALUES ('Chocolate', 'Chocolate Pie', '100g');
+
+SELECT * FROM needs_ingredient;
