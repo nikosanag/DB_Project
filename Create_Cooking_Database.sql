@@ -59,7 +59,7 @@ CONSTRAINT f_key_tags_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 
 CREATE TABLE tips(
 rec_name VARCHAR(50),
-tip VARCHAR(50) DEFAULT NULL,
+tip VARCHAR(50),
 PRIMARY KEY (rec_name,tip),
 CONSTRAINT f_key_tips_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 );
