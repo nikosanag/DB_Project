@@ -68,8 +68,122 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(Cook_name) apps_count
         
 DROP TABLE appearances;
 
+-- 3.6
 
 
+-- 3.7
+-- !!!!!!! same query is used 2 times-> could use temporary table !!!!!!!
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) Cook_name, COUNT(episode_number) Number_of_Appearances
+FROM cooks_recipes_per_episode
+JOIN cooks USING (cook_id)
+GROUP BY Cook_name
+HAVING Number_of_Appearances +5 < (
+SELECT MAX(Number_of_Appearances) max_apps
+FROM(
+SELECT cook_id, COUNT(episode_number) Number_of_Appearances
+FROM cooks_recipes_per_episode
+GROUP BY cook_id) appearances
+);
+
+-- 3.8
+
+-- 3.9
+SELECT current_year, AVG(grams_of_carbohydrates) 'Avarage Grams of Carbohydrates per Year'
+FROM(
+SELECT current_year, grams_of_carbohydrates_per_portion*portions grams_of_carbohydrates
+FROM cooks_recipes_per_episode
+JOIN recipe USING (rec_name)) carbo
+GROUP BY current_year;
+
+-- 3.10
+
+-- 3.11
+
+-- 3.12
+DROP TABLE IF EXISTS `avg_level_per_episode`;
+
+CREATE TEMPORARY TABLE avg_level_per_episode
+SELECT current_year, episode_number, AVG(level_of_diff) avg_level
+FROM(
+SELECT current_year, episode_number, level_of_diff 
+FROM cooks_recipes_per_episode
+JOIN recipe USING(rec_name)
+) a
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number, avg_level
+FROM avg_level_per_episode c
+WHERE avg_level = (
+					SELECT MAX(avg_level)
+                    FROM avg_level_per_episode d
+                    GROUP BY current_year
+                    HAVING d.current_year=c.current_year
+                    );
+
+DROP TABLE avg_level_per_episode;
+
+-- 3.13
+-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+DROP TABLE IF EXISTS `level_of_eps`;
+
+CREATE TEMPORARY TABLE level_of_eps
+SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
+FROM(
+SELECT current_year, episode_number, level_of_cook
+FROM(
+SELECT current_year, episode_number, cook_category
+FROM cooks_recipes_per_episode
+JOIN cooks USING (cook_id)
+UNION ALL
+SELECT current_year, episode_number, cook_category
+FROM judges
+JOIN cooks USING (cook_id)
+) cooks_categories
+JOIN(SELECT 1 level_of_cook, 'C Cook' cook_category
+	UNION
+    SELECT 2 level_of_cook, 'B Cook' cook_category
+    UNION
+    SELECT 3 level_of_cook, 'A Cook' cook_category
+    UNION
+    SELECT 4 level_of_cook, "Chef's Assistant" cook_category
+    UNION
+    SELECT 5 level_of_cook, 'Chef' cook_category
+        ) temp USING (cook_category)
+) temp1
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number
+FROM level_of_eps
+WHERE level_of_episode <= ALL (SELECT level_of_episode FROM level_of_eps);
+
+DROP TABLE level_of_eps;
+
+-- 3.14
+DROP TABLE IF EXISTS `appearances`;
+
+CREATE TEMPORARY TABLE appearances
+SELECT name_of_thematic_unit, COUNT(episode_number) apps_num
+FROM(
+SELECT episode_number, name_of_thematic_unit
+FROM cooks_recipes_per_episode
+JOIN belongs_to_thematic_unit USING (rec_name)) temp
+GROUP BY name_of_thematic_unit;
+
+SELECT name_of_thematic_unit
+FROM appearances
+WHERE apps_num = (SELECT MAX(apps_num) FROM appearances);
+
+DROP TABLE appearances;
+
+-- 3.15
+SELECT name_of_food_group
+FROM food_group
+WHERE name_of_food_group NOT IN(
+SELECT name_of_food_group
+FROM cooks_recipes_per_episode
+JOIN recipe USING (rec_name)
+JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
+JOIN food_group USING (name_of_food_group));
 
 
 
@@ -194,7 +308,97 @@ VALUES (2000,1,10),
         (2001,3,1),
         (2001,3,6),
         (2001,3,7);
-        
+
+
+CREATE TABLE recipe(
+rec_name varchar(50), 
+rec_type varchar(50) DEFAULT 'Regular' CHECK(rec_type IN ('Pastry','Regular')),
+level_of_diff INT(11) CHECK (level_of_diff IN (1,2,3,4,5)),
+short_descr VARCHAR(50)  DEFAULT NULL,
+prep_time INT(11) CHECK (prep_time>0),
+cooking_time INT(11) CHECK (cooking_time>0),
+portions INT(11) CHECK (portions>0),
+name_of_main_ingredient VARCHAR(50) NOT NULL,
+grams_of_fat_per_portion INT(11) CHECK(grams_of_fat_per_portion>0),
+grams_of_carbohydrates_per_portion INT(11) CHECK(grams_of_carbohydrates_per_portion>0),
+grams_of_proteins_per_portion INT(11) CHECK(grams_of_proteins_per_portion>0),
+calories_per_portion INT(11),
+national_cuisine VARCHAR(50), 
+PRIMARY KEY (rec_name)
+);
+
+INSERT INTO recipe
+VALUES ('Paidakia',DEFAULT,3,'cooked children',15,45,4,'Meat',300,100,250,380,'Greek'),
+		('Rice',DEFAULT,1,'rice',5,30,3,'rice',50,300,20,80,'Greek'),
+        ('Ice Cream','Pastry',3,'2 Chocolate Ice Cream Balls',15,20,2,'Chocolate',100,50,10,180,'French'),
+        ('Chicken Soup',DEFAULT,3,NULL,25,45,1,'Chicken',200,150,150,250,'Greek'),
+        ('Joe Dada',DEFAULT,5,'cooked dada',60,45,1,'Murdered Dada',500,300,450,680,'German'),
+        ('Cookies',DEFAULT,4,NULL,25,25,10,'Chocolate',200,100,250,280,'German');
+
+CREATE TABLE food_group(
+name_of_food_group VARCHAR(50),
+description_of_food_group VARCHAR(50),
+recipe_description VARCHAR(50),
+PRIMARY KEY (name_of_food_group)
+);
+
+INSERT INTO food_group
+VALUES ('Pasta',NULL,NULL),
+		('Sweet',NULL,NULL),
+        ('Protein food',NULL,NULL),
+        ('People',NULL,NULL),
+        ('Fish',NULL,NULL),
+        ('Legumes',NULL,NULL);
+
+CREATE TABLE ingredients(
+name_of_ingredient VARCHAR(50),
+calories_per_100gr INT(11),
+name_of_food_group VARCHAR(50) NOT NULL,
+PRIMARY KEY (name_of_ingredient)
+);
+
+INSERT INTO ingredients
+VALUES ('Meat',200,'Protein food'),
+		('rice',100,'Pasta'),
+        ('Chocolate',120,'Sweet'),
+        ('Chicken',180,'Protein food'),
+        ('Murdered Dada',300,'People');
+
+CREATE TABLE thematic_unit(
+name_of_thematic_unit VARCHAR(50),
+description_of_thematic_unit VARCHAR(100),
+PRIMARY KEY (name_of_thematic_unit)
+);
+
+INSERT INTO thematic_unit
+VALUES ('Barbeque food',NULL),
+		('Chinese food', NULL),
+        ('Food to eat when sick', NULL),
+        ('Food for dessert', NULL),
+        ('Food for crying', NULL),
+        ('Food to get fat', NULL),
+        ('Food for cannibals', NULL),
+        ('Food for murderes', NULL);
+
+CREATE TABLE belongs_to_thematic_unit(
+rec_name VARCHAR(50),
+name_of_thematic_unit VARCHAR(50),
+PRIMARY KEY (rec_name,name_of_thematic_unit)
+);
+
+INSERT INTO belongs_to_thematic_unit
+VALUES ('Paidakia','Barbeque food'),
+		('Rice','Chinese food'),
+        ('Rice','Food to eat when sick'),
+        ('Ice Cream','Food for dessert'),
+        ('Ice Cream','Food for crying'),
+        ('Ice Cream','Food to get fat'),
+        ('Chicken Soup','Food to eat when sick'),
+        ('Joe Dada','Food for cannibals'),
+        ('Joe Dada','Food for murderes'),
+        ('Cookies','Food to get fat'),
+        ('Cookies','Food for dessert');
+
 -- 3.1
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'contestant_name/national_cuisine', AVG(grade)
 FROM evaluation
@@ -246,7 +450,7 @@ FROM judges
 JOIN cooks USING (cook_id)
 GROUP BY current_year, Cook_name
 -- HAVING Number_of_Appearances>3
--- this is commented here because no judge has appeared more than 3 times so there is no reason to put it
+-- this is commented here because no judge has appeared more than 3 times, so there is no reason to put it
 ORDER BY current_year, Number_of_Appearances;
 
 
@@ -258,3 +462,155 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(Cook_name) apps_count
 		HAVING apps_count>1) b USING (current_year, Number_of_Appearances);
         
 DROP TABLE appearances;
+
+
+-- 3.6
+
+
+-- 3.7
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) Cook_name, COUNT(episode_number) Number_of_Appearances
+FROM cooks_recipes_per_episode
+JOIN cooks USING (cook_id)
+GROUP BY Cook_name
+HAVING Number_of_Appearances 
+-- +5
+-- this is commented here because no contestant has appeared 5 times less than the contestant with the max apps, so there is no reason to put it
+< (
+SELECT MAX(Number_of_Appearances) max_apps
+FROM(
+SELECT cook_id, COUNT(episode_number) Number_of_Appearances
+FROM cooks_recipes_per_episode
+GROUP BY cook_id) appearances
+);
+
+-- 3.8
+
+-- 3.9
+SELECT current_year, AVG(grams_of_carbohydrates) 'Avarage Grams of Carbohydrates per Year'
+FROM(
+SELECT current_year, grams_of_carbohydrates_per_portion*portions grams_of_carbohydrates
+FROM cooks_recipes_per_episode
+JOIN recipe USING (rec_name)) carbo
+GROUP BY current_year;
+
+
+-- 3.10
+DROP TABLE IF EXISTS `nat_cus`;
+
+CREATE TEMPORARY TABLE nat_cus
+SELECT current_year, national_cuisine, COUNT(rec_name) Number_of_aps
+FROM(
+SELECT current_year, rec_name, national_cuisine
+FROM cooks_recipes_per_episode
+JOIN recipe USING(rec_name)
+) nat_cus
+GROUP BY current_year, national_cuisine;
+
+
+
+SELECT * 
+FROM nat_cus
+WHERE national_cuisine NOT IN (
+SELECT DISTINCT national_cuisine 
+FROM nat_cus
+WHERE Number_of_aps<2
+);
+
+
+
+
+
+SELECT a.current_year first_year, b.current_year second_year, a.national_cuisine national_cuisine, a.Number_of_aps+b.Number_of_aps Number_of_aps
+FROM nat_cus a
+JOIN nat_cus b ON a.current_year=b.current_year-1 AND a.national_cuisine=b.national_cuisine;
+
+
+-- 3.11
+
+-- 3.12
+DROP TABLE IF EXISTS `avg_level_per_episode`;
+
+CREATE TEMPORARY TABLE avg_level_per_episode
+SELECT current_year, episode_number, AVG(level_of_diff) avg_level
+FROM(
+SELECT current_year, episode_number, level_of_diff 
+FROM cooks_recipes_per_episode
+JOIN recipe USING(rec_name)
+) a
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number, avg_level
+FROM avg_level_per_episode c
+WHERE avg_level = (
+					SELECT MAX(avg_level)
+                    FROM avg_level_per_episode d
+                    GROUP BY current_year
+                    HAVING d.current_year=c.current_year
+                    );
+
+DROP TABLE avg_level_per_episode;
+
+-- 3.13
+DROP TABLE IF EXISTS `level_of_eps`;
+
+CREATE TEMPORARY TABLE level_of_eps
+SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
+FROM(
+SELECT current_year, episode_number, level_of_cook
+FROM(
+SELECT current_year, episode_number, cook_category
+FROM cooks_recipes_per_episode
+JOIN cooks USING (cook_id)
+UNION ALL
+SELECT current_year, episode_number, cook_category
+FROM judges
+JOIN cooks USING (cook_id)
+) cooks_categories
+JOIN(SELECT 1 level_of_cook, 'C Cook' cook_category
+	UNION
+    SELECT 2 level_of_cook, 'B Cook' cook_category
+    UNION
+    SELECT 3 level_of_cook, 'A Cook' cook_category
+    UNION
+    SELECT 4 level_of_cook, "Chef's Assistant" cook_category
+    UNION
+    SELECT 5 level_of_cook, 'Chef' cook_category
+        ) temp USING (cook_category)
+) temp1
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number
+FROM level_of_eps
+WHERE level_of_episode <= ALL (SELECT level_of_episode FROM level_of_eps);
+
+DROP TABLE level_of_eps;
+
+-- 3.14
+DROP TABLE IF EXISTS `appearances`;
+
+CREATE TEMPORARY TABLE appearances
+SELECT name_of_thematic_unit, COUNT(episode_number) apps_num
+FROM(
+SELECT episode_number, name_of_thematic_unit
+FROM cooks_recipes_per_episode
+JOIN belongs_to_thematic_unit USING (rec_name)) temp
+GROUP BY name_of_thematic_unit;
+
+SELECT name_of_thematic_unit
+FROM appearances
+WHERE apps_num = (SELECT MAX(apps_num) FROM appearances);
+
+DROP TABLE appearances;
+
+-- 3.15
+SELECT name_of_food_group
+FROM food_group
+WHERE name_of_food_group NOT IN(
+SELECT name_of_food_group
+FROM cooks_recipes_per_episode
+JOIN recipe USING (rec_name)
+JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
+JOIN food_group USING (name_of_food_group)
+);
+
+
