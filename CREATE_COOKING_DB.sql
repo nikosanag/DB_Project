@@ -44,6 +44,17 @@ CONSTRAINT f_key_needs_ingredient_recipe FOREIGN KEY (rec_name) REFERENCES recip
 CONSTRAINT f_key_needs_ingredient_ingredients FOREIGN KEY (name_of_ingredient) REFERENCES ingredients (name_of_ingredient)
 );
 
+
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON recipe
+FOR EACH ROW
+BEGIN
+SET name_of_recipe = NEW.rec_name; 
+SELECT * from needs_ingredient;
+INSERT INTO recipe(calories_per_portion) Value (res);
+END
+//
+
 CREATE TABLE type_of_meal(
 meal_type VARCHAR(50) DEFAULT 'Lunch',
 rec_name VARCHAR(50),
@@ -64,6 +75,11 @@ tip VARCHAR(50),
 PRIMARY KEY (rec_name,tip),
 CONSTRAINT f_key_tips_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 );
+
+
+
+
+
 
 CREATE TABLE equipment(
 equipment_name VARCHAR(50),
@@ -157,3 +173,26 @@ CONSTRAINT f_key_evaluation_cooks_contestant FOREIGN KEY (contestant_id) REFEREN
 CONSTRAINT f_key_evaluation_cooks_judge FOREIGN KEY (judge_id) REFERENCES cooks(cook_id)
 
 );
+
+DELIMITER //
+CREATE TRIGGER before_tip_insert BEFORE INSERT ON tips 
+FOR EACH ROW
+BEGIN
+IF (SELECT COUNT(*) FROM tips WHERE New.rec_name = rec_name) = 3 
+THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'ALREADY 3 TIPS';
+END IF; 
+END
+//
+
+
+
+
+DELIMITER //
+CREATE TRIGGER before_cooks_insert BEFORE INSERT ON cooks
+FOR EACH ROW
+BEGIN
+SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
+END
+//
+
+
