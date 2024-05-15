@@ -45,15 +45,6 @@ CONSTRAINT f_key_needs_ingredient_ingredients FOREIGN KEY (name_of_ingredient) R
 );
 
 
-DELIMITER // 
-CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON recipe
-FOR EACH ROW
-BEGIN
-SET name_of_recipe = NEW.rec_name; 
-SELECT * from needs_ingredient;
-INSERT INTO recipe(calories_per_portion) Value (res);
-END
-//
 
 CREATE TABLE type_of_meal(
 meal_type VARCHAR(50) DEFAULT 'Lunch',
@@ -184,7 +175,19 @@ END IF;
 END
 //
 
-
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
+FOR EACH ROW
+BEGIN
+DECLARE ingredient_cal_per_100g INT;
+DECLARE total INT;
+SET ingredient_cal_per_100g = (SELECT calories_per_100gr FROM ingredients WHERE name_of_ingredient = NEW.name_of_ingredient) ;
+SET total = ingredient_cal_per_100g * (NEW.quantity/100); 
+UPDATE recipe
+SET calories_per_portion = total
+WHERE rec_name = NEW.rec_name ;
+END
+//
 
 
 DELIMITER //
@@ -194,5 +197,3 @@ BEGIN
 SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
 END
 //
-
-
