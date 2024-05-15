@@ -185,8 +185,9 @@ END
 //
 DELIMITER ;
 
+
 DELIMITER // 
-CREATE TRIGGER calculate_calories_for_recipe BEFORE INSERT ON needs_ingredient
+CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
 FOR EACH ROW
 BEGIN
 UPDATE recipe
