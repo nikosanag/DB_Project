@@ -162,8 +162,17 @@ PRIMARY KEY (current_year,episode_number,contestant_id,judge_id),
 CONSTRAINT f_key_evaluation_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
 CONSTRAINT f_key_evaluation_cooks_contestant FOREIGN KEY (contestant_id) REFERENCES cooks(cook_id),
 CONSTRAINT f_key_evaluation_cooks_judge FOREIGN KEY (judge_id) REFERENCES cooks(cook_id)
-
 );
+
+CREATE TABLE winners(
+current_year INT(11) ,
+episode_number INT(11) ,
+cook_id INT(11) ,
+PRIMARY KEY (current_year,episode_number,cook_id),
+CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
+CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
+);
+
 
 DELIMITER //
 CREATE TRIGGER before_tip_insert BEFORE INSERT ON tips 
@@ -174,6 +183,7 @@ THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'ALREADY 3 TIPS';
 END IF; 
 END
 //
+DELIMITER ;
 
 DELIMITER // 
 CREATE TRIGGER calculate_calories_for_recipe BEFORE INSERT ON needs_ingredient
@@ -197,3 +207,4 @@ BEGIN
 SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
 END
 //
+DELIMITER ;
