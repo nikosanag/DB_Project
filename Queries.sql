@@ -528,6 +528,18 @@ VALUES ('Lunch','Paidakia'),
         ('Cold','Cookies'),
         ('Ideal for Parties','Cookies'),
         ('Sweet dish','Cookies');
+        
+
+CREATE TABLE tips(
+rec_name VARCHAR(50),
+tip VARCHAR(50),
+PRIMARY KEY (rec_name,tip)
+);
+
+INSERT INTO tips
+VALUES ('Rice','abc'),
+		('Rice','def'),
+        ('Rice','ghi');
 
 -- 3.1
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'contestant_name/national_cuisine', AVG(grade)
@@ -839,5 +851,14 @@ JOIN recipe USING (rec_name)
 JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
 JOIN food_group USING (name_of_food_group)
 );
+
+
+
+
+
+
+
+
+
 
 
