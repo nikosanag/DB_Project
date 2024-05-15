@@ -176,18 +176,18 @@ END
 //
 
 DELIMITER // 
-CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
+CREATE TRIGGER calculate_calories_for_recipe BEFORE INSERT ON needs_ingredient
 FOR EACH ROW
 BEGIN
-DECLARE ingredient_cal_per_100g INT;
-DECLARE total INT;
-SET ingredient_cal_per_100g = (SELECT calories_per_100gr FROM ingredients WHERE name_of_ingredient = NEW.name_of_ingredient) ;
-SET total = ingredient_cal_per_100g * (NEW.quantity/100); 
 UPDATE recipe
-SET calories_per_portion = total
-WHERE rec_name = NEW.rec_name ;
+SET calories_per_portion = calories_per_portion + (
+	SELECT calories_per_100gr*NEW.quantity/100/portions 
+    FROM ingredients 
+    WHERE name_of_ingredient = NEW.name_of_ingredient)
+WHERE rec_name = NEW.rec_name;
 END
 //
+DELIMITER ;
 
 
 DELIMITER //
