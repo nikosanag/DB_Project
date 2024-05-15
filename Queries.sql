@@ -541,6 +541,16 @@ VALUES ('Rice','abc'),
 		('Rice','def'),
         ('Rice','ghi');
 
+
+CREATE TABLE needs_ingredient(
+name_of_ingredient VARCHAR(50),
+rec_name VARCHAR(50),
+quantity VARCHAR(50),
+PRIMARY KEY (name_of_ingredient,rec_name)
+);
+
+
+
 -- 3.1
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'contestant_name/national_cuisine', AVG(grade)
 FROM evaluation
@@ -854,11 +864,41 @@ JOIN food_group USING (name_of_food_group)
 
 
 
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
+FOR EACH ROW
+BEGIN
+DECLARE ingredient_cal_per_100g INT(11);
+DECLARE total INT(11);
+SET ingredient_cal_per_100g = (SELECT calories_per_100gr FROM ingredients WHERE name_of_ingredient = NEW.name_of_ingredient) ;
+SET total = ingredient_cal_per_100g * NEW.quantity; 
+UPDATE recipe
+SET calories_per_portion = total + calories_per_portion
+WHERE rec_name = NEW.rec_name ;
+END
+//
+DROP TRIGGER calculate_calories_for_recipe;
+
+INSERT INTO needs_ingredient
+VALUES ('Paidakia','Meat',2);
+
+DELETE FROM needs_ingredient;
+
+UPDATE recipe
+SET calories_per_portion= 0
+WHERE rec_name='Paidakia';
 
 
 
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe BEFORE INSERT ON needs_ingredient
+FOR EACH ROW
+BEGIN
+UPDATE recipe
+SET calories_per_portion = calories_per_portion + (SELECT calories_per_100gr*NEW.quantity FROM ingredients WHERE name_of_ingredient = NEW.name_of_ingredient)
+WHERE rec_name = NEW.rec_name ;
+END
+//
 
 
-
-
-
+SELECT calories_per_100gr*2 FROM ingredients WHERE name_of_ingredient = 'Meat';
