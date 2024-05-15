@@ -1,8 +1,4 @@
 -- 3.1
--- ????????????????????????
--- Do they want cook_id or cook_name?
--- Do they want it like that in 1 table? Do they want 2 tables? Do they want 1 table with 3 attributes and null values?
--- ????????????????????????
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'contestant_name/national_cuisine', AVG(grade)
 FROM evaluation
 JOIN cooks ON contestant_id=cook_id
@@ -14,9 +10,6 @@ JOIN cooks_belongs_to_national_cuisine ON contestant_id=cook_id
 GROUP BY type_of_national_cuisine_that_belongs_to;
 
 -- 3.2
--- ???????????
--- What do they want? 1 or 2 tables + what in its case + what does given mean ...
--- ???????????
 SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', type_of_national_cuisine_that_belongs_to 'National Cuisine', current_year 'Year of the episode'
 FROM cooks
 JOIN cooks_recipes_per_episode USING (cook_id)
@@ -69,7 +62,18 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(Cook_name) apps_count
 DROP TABLE appearances;
 
 -- 3.6
-
+-- ++++ force index
+SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
+FROM(
+SELECT current_year, episode_number, competition.rec_name recipe, a.tag_name a_tag_name, b.tag_name b_tag_name
+FROM cooks_recipes_per_episode competition
+JOIN tags a USING (rec_name)
+JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+ORDER BY current_year, episode_number, competition.rec_name
+) temp1
+GROUP BY a_tag_name, b_tag_name
+ORDER BY Tag_Couple_Appearances DESC
+LIMIT 3;
 
 -- 3.7
 -- !!!!!!! same query is used 2 times-> could use temporary table !!!!!!!
@@ -86,6 +90,24 @@ GROUP BY cook_id) appearances
 );
 
 -- 3.8
+-- ++++++ force index
+DROP TABLE IF EXISTS `amount`;
+
+CREATE TEMPORARY TABLE amount
+SELECT current_year, episode_number, COUNT(equipment_name) Amount_of_Equipment
+FROM cooks_recipes_per_episode
+JOIN uses_equipment USING (rec_name)
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number, Amount_of_Equipment
+FROM amount
+WHERE Amount_of_Equipment= (
+								SELECT MAX(Amount_of_Equipment)
+                                FROM amount
+                                )
+;
+
+DROP TABLE amount;
 
 -- 3.9
 SELECT current_year, AVG(grams_of_carbohydrates) 'Avarage Grams of Carbohydrates per Year'
@@ -96,8 +118,67 @@ JOIN recipe USING (rec_name)) carbo
 GROUP BY current_year;
 
 -- 3.10
+DROP TABLE IF EXISTS `nat_cus_year_apps`;
+
+CREATE TEMPORARY TABLE nat_cus_year_apps
+SELECT DISTINCT current_year, national_cuisine, Number_of_apps
+FROM episodes_per_year
+JOIN (SELECT national_cuisine
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING(rec_name)
+        ) temp1
+LEFT JOIN (
+	SELECT current_year, national_cuisine, COUNT(rec_name) Number_of_apps
+	FROM(
+		SELECT current_year, rec_name, national_cuisine
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING(rec_name)
+		) temp2
+	GROUP BY current_year, national_cuisine
+	) temp3 USING (current_year, national_cuisine)
+;
+
+
+DROP TABLE IF EXISTS `nat_cus_min_3apps_per_year`;
+
+CREATE TEMPORARY TABLE nat_cus_min_3apps_per_year
+SELECT current_year, national_cuisine, Number_of_apps
+FROM nat_cus_year_apps
+WHERE national_cuisine NOT IN (SELECT DISTINCT national_cuisine
+								FROM nat_cus_year_apps
+								WHERE Number_of_apps IS NULL OR Number_of_apps <3
+                                )
+;
+
+DROP TABLE IF EXISTS `nat_cus_apps_per_2years`;
+
+CREATE TEMPORARY TABLE nat_cus_apps_per_2years
+SELECT a.current_year first_year, b.current_year second_year, a.national_cuisine, a.Number_of_apps+b.Number_of_apps Number_of_apps
+FROM nat_cus_min_3apps_per_year a
+JOIN nat_cus_min_3apps_per_year b ON a.current_year = b.current_year-1 AND a.national_cuisine = b.national_cuisine
+;
+
+SELECT a.first_year first_year, a.second_year second_year, a.national_cuisine first_national_cuisine, b.national_cuisine second_national_cuisine, a.Number_of_apps Number_of_apps
+FROM nat_cus_apps_per_2years a
+JOIN nat_cus_apps_per_2years b ON a.national_cuisine < b.national_cuisine AND a.Number_of_apps = b.Number_of_apps AND a.first_year=b.first_year
+ORDER BY first_year, Number_of_apps
+;
+
+DROP TABLE nat_cus_year_apps;
+DROP TABLE nat_cus_min_3apps_per_year;
+DROP TABLE nat_cus_apps_per_2years;
 
 -- 3.11
+SELECT CONCAT(cont.name_of_cook,' ',cont.surname_of_cook) Contestant_name, 
+		CONCAT(judge.name_of_cook,' ',judge.surname_of_cook) Judge_name,
+		AVG(grade) Avarage_grade
+FROM evaluation
+JOIN cooks cont ON cont.cook_id=contestant_id
+JOIN cooks judge ON judge.cook_id=judge_id
+GROUP BY Contestant_name, Judge_name
+ORDER BY Avarage_grade DESC
+LIMIT 5;
+
 
 -- 3.12
 DROP TABLE IF EXISTS `avg_level_per_episode`;
@@ -123,7 +204,6 @@ WHERE avg_level = (
 DROP TABLE avg_level_per_episode;
 
 -- 3.13
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 DROP TABLE IF EXISTS `level_of_eps`;
 
 CREATE TEMPORARY TABLE level_of_eps
@@ -152,7 +232,7 @@ JOIN(SELECT 1 level_of_cook, 'C Cook' cook_category
 ) temp1
 GROUP BY current_year, episode_number;
 
-SELECT current_year, episode_number
+SELECT current_year, episode_number, level_of_episode
 FROM level_of_eps
 WHERE level_of_episode <= ALL (SELECT level_of_episode FROM level_of_eps);
 
@@ -169,7 +249,7 @@ FROM cooks_recipes_per_episode
 JOIN belongs_to_thematic_unit USING (rec_name)) temp
 GROUP BY name_of_thematic_unit;
 
-SELECT name_of_thematic_unit
+SELECT name_of_thematic_unit, apps_num Number_of_Appearances
 FROM appearances
 WHERE apps_num = (SELECT MAX(apps_num) FROM appearances);
 
@@ -270,6 +350,7 @@ VALUES (2000,1),
 		(2001,1),
 		(2001,2),
         (2001,3);
+        
 
 
 CREATE TABLE cooks_recipes_per_episode(
@@ -279,6 +360,8 @@ rec_name VARCHAR(50),
 cook_id INT(11),
 PRIMARY KEY (current_year,episode_number,cook_id)
 ); 
+
+
 
 INSERT INTO cooks_recipes_per_episode
 VALUES (2000,1,'Paidakia',1),
@@ -398,6 +481,53 @@ VALUES ('Paidakia','Barbeque food'),
         ('Joe Dada','Food for murderes'),
         ('Cookies','Food to get fat'),
         ('Cookies','Food for dessert');
+        
+CREATE TABLE uses_equipment(
+rec_name VARCHAR(50),
+equipment_name VARCHAR(50),
+PRIMARY KEY (rec_name,equipment_name)
+);
+
+INSERT INTO uses_equipment
+VALUES ('Paidakia','Barbeque'),
+		('Rice','Pot'),
+        ('Ice Cream','Mixer'),
+        ('Chicken Soup','Pot'),
+        ('Joe Dada','Knife'),
+        ('Joe Dada','Gun'),
+        ('Joe Dada','Rope'),
+        ('Joe Dada','Barbeque'),
+        ('Cookies','Oven'),
+        ('Cookies','Mixer');
+        
+CREATE TABLE tags(
+tag_name VARCHAR(50),
+rec_name VARCHAR(50),
+PRIMARY KEY(tag_name,rec_name)
+);
+
+INSERT INTO tags
+VALUES ('Lunch','Paidakia'),
+		('Ideal for Easter','Paidakia'),
+        ('Barbeque dish','Paidakia'),
+        ('Test','Paidakia'),
+		('Chinese dish','Rice'),
+        ('Lunch','Rice'),
+        ('Dinner','Rice'),
+        ('Test','Rice'),
+        ('Sweet dish','Ice Cream'),
+        ('Ideal for Parties','Ice Cream'),
+        ('Ideal for Sad Moments','Ice Cream'),
+        ('Lunch','Chicken Soup'),
+        ('Inferior dish','Chicken Soup'),
+        ('Lunch','Joe Dada'),
+        ('Dinner','Joe Dada'),
+        ('Test','Joe Dada'),
+        ('Crazy dish','Joe Dada'),
+        ('Ideal for Parties','Joe Dada'),
+        ('Cold','Cookies'),
+        ('Ideal for Parties','Cookies'),
+        ('Sweet dish','Cookies');
 
 -- 3.1
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'contestant_name/national_cuisine', AVG(grade)
@@ -465,6 +595,16 @@ DROP TABLE appearances;
 
 
 -- 3.6
+SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
+FROM(
+SELECT current_year, episode_number, competition.rec_name recipe, a.tag_name a_tag_name, b.tag_name b_tag_name
+FROM cooks_recipes_per_episode competition
+JOIN tags a USING (rec_name)
+JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+ORDER BY current_year, episode_number, competition.rec_name
+) temp1
+GROUP BY a_tag_name, b_tag_name;
+
 
 
 -- 3.7
@@ -484,6 +624,23 @@ GROUP BY cook_id) appearances
 );
 
 -- 3.8
+DROP TABLE IF EXISTS `amount`;
+
+CREATE TEMPORARY TABLE amount
+SELECT current_year, episode_number, COUNT(equipment_name) Amount_of_Equipment
+FROM cooks_recipes_per_episode
+JOIN uses_equipment USING (rec_name)
+GROUP BY current_year, episode_number;
+
+SELECT current_year, episode_number, Amount_of_Equipment
+FROM amount
+WHERE Amount_of_Equipment= (
+								SELECT MAX(Amount_of_Equipment)
+                                FROM amount
+                                )
+;
+
+DROP TABLE amount;
 
 -- 3.9
 SELECT current_year, AVG(grams_of_carbohydrates) 'Avarage Grams of Carbohydrates per Year'
@@ -495,37 +652,107 @@ GROUP BY current_year;
 
 
 -- 3.10
-DROP TABLE IF EXISTS `nat_cus`;
+INSERT INTO episodes_per_year
+VALUES(2002,1);
 
-CREATE TEMPORARY TABLE nat_cus
-SELECT current_year, national_cuisine, COUNT(rec_name) Number_of_aps
-FROM(
-SELECT current_year, rec_name, national_cuisine
-FROM cooks_recipes_per_episode
-JOIN recipe USING(rec_name)
-) nat_cus
-GROUP BY current_year, national_cuisine;
+INSERT INTO recipe
+VALUES ('something1',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
+		('something2',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
+        ('something3',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
+        ('somethingelse1',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian'),
+		('somethingelse2',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian'),
+        ('somethingelse3',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian');
+
+INSERT INTO cooks_recipes_per_episode
+VALUES (2000,1,'something1',20),
+		(2000,1,'something2',21),
+        (2000,1,'something3',22),
+        (2001,1,'something1',20),
+        (2001,2,'something2',21),
+        (2001,3,'something3',22),
+        (2002,1,'something1',20),
+		(2002,1,'something2',21),
+        (2002,1,'something3',22),
+        (2000,1,'somethingelse1',30),
+		(2000,1,'somethingelse2',31),
+        (2000,1,'somethingelse3',32),
+        (2001,1,'somethingelse1',30),
+        (2001,2,'somethingelse2',31),
+        (2001,3,'somethingelse3',32),
+        (2002,1,'somethingelse1',30),
+		(2002,1,'somethingelse2',31),
+        (2002,1,'somethingelse3',32);
 
 
+DROP TABLE IF EXISTS `nat_cus_year_apps`;
 
-SELECT * 
-FROM nat_cus
-WHERE national_cuisine NOT IN (
-SELECT DISTINCT national_cuisine 
-FROM nat_cus
-WHERE Number_of_aps<2
-);
+CREATE TEMPORARY TABLE nat_cus_year_apps
+SELECT DISTINCT current_year, national_cuisine, Number_of_apps
+FROM episodes_per_year
+JOIN (SELECT national_cuisine
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING(rec_name)
+        ) temp1
+LEFT JOIN (
+	SELECT current_year, national_cuisine, COUNT(rec_name) Number_of_apps
+	FROM(
+		SELECT current_year, rec_name, national_cuisine
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING(rec_name)
+		) temp2
+	GROUP BY current_year, national_cuisine
+	) temp3 USING (current_year, national_cuisine)
+;
 
 
+DROP TABLE IF EXISTS `nat_cus_min_3apps_per_year`;
 
+CREATE TEMPORARY TABLE nat_cus_min_3apps_per_year
+SELECT current_year, national_cuisine, Number_of_apps
+FROM nat_cus_year_apps
+WHERE national_cuisine NOT IN (SELECT DISTINCT national_cuisine
+								FROM nat_cus_year_apps
+								WHERE Number_of_apps IS NULL OR Number_of_apps <3
+                                )
+;
 
+DROP TABLE IF EXISTS `nat_cus_apps_per_2years`;
 
-SELECT a.current_year first_year, b.current_year second_year, a.national_cuisine national_cuisine, a.Number_of_aps+b.Number_of_aps Number_of_aps
-FROM nat_cus a
-JOIN nat_cus b ON a.current_year=b.current_year-1 AND a.national_cuisine=b.national_cuisine;
+CREATE TEMPORARY TABLE nat_cus_apps_per_2years
+SELECT a.current_year first_year, b.current_year second_year, a.national_cuisine, a.Number_of_apps+b.Number_of_apps Number_of_apps
+FROM nat_cus_min_3apps_per_year a
+JOIN nat_cus_min_3apps_per_year b ON a.current_year = b.current_year-1 AND a.national_cuisine = b.national_cuisine
+;
 
+SELECT a.first_year first_year, a.second_year second_year, a.national_cuisine first_national_cuisine, b.national_cuisine second_national_cuisine, a.Number_of_apps Number_of_apps
+FROM nat_cus_apps_per_2years a
+JOIN nat_cus_apps_per_2years b ON a.national_cuisine < b.national_cuisine AND a.Number_of_apps = b.Number_of_apps AND a.first_year=b.first_year
+ORDER BY first_year, Number_of_apps
+;
+
+DROP TABLE nat_cus_year_apps;
+DROP TABLE nat_cus_min_3apps_per_year;
+DROP TABLE nat_cus_apps_per_2years;
+
+DELETE FROM recipe
+WHERE national_cuisine IN ('Brasilian','Argentinian');
+
+DELETE FROM episodes_per_year
+WHERE current_year=2002;
+
+DELETE FROM cooks_recipes_per_episode
+WHERE rec_name IN ('something1','something2','something3','somethingelse1','somethingelse2','somethingelse3');
 
 -- 3.11
+SELECT CONCAT(cont.name_of_cook,' ',cont.surname_of_cook) Contestant_name, 
+		CONCAT(judge.name_of_cook,' ',judge.surname_of_cook) Judge_name,
+		AVG(grade) Avarage_grade
+FROM evaluation
+JOIN cooks cont ON cont.cook_id=contestant_id
+JOIN cooks judge ON judge.cook_id=judge_id
+GROUP BY Contestant_name, Judge_name
+ORDER BY Avarage_grade DESC
+LIMIT 5;
 
 -- 3.12
 DROP TABLE IF EXISTS `avg_level_per_episode`;
