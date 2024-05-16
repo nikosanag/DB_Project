@@ -174,13 +174,30 @@ CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
 
 
+DELIMITER // 
+CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
+FOR EACH ROW 
+BEGIN
+
+IF NEW.date_of_birth != OLD.date_of_birth THEN
+SET NEW.age = TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
+END IF; 
+
+
+END
+//
+DELIMITER ; 
+
+
 DELIMITER //
-CREATE TRIGGER before_tip_insert BEFORE INSERT ON tips 
+CREATE TRIGGER prevents_more_than_3_tips BEFORE INSERT ON tips 
 FOR EACH ROW
 BEGIN
+
 IF (SELECT COUNT(*) FROM tips WHERE New.rec_name = rec_name) = 3 
 THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'ALREADY 3 TIPS';
 END IF; 
+
 END
 //
 DELIMITER ;
@@ -190,22 +207,57 @@ DELIMITER //
 CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
 FOR EACH ROW
 BEGIN
+
 UPDATE recipe
 SET calories_per_portion = calories_per_portion + (
 	SELECT calories_per_100gr*NEW.quantity/100/portions 
     FROM ingredients 
     WHERE name_of_ingredient = NEW.name_of_ingredient)
 WHERE rec_name = NEW.rec_name;
+
 END
 //
 DELIMITER ;
 
 
 DELIMITER //
-CREATE TRIGGER before_cooks_insert BEFORE INSERT ON cooks
+CREATE TRIGGER calculates_age_on_insert BEFORE INSERT ON cooks
 FOR EACH ROW
 BEGIN
+
 SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
+
 END
 //
 DELIMITER ;
+
+
+
+DELIMITER // 
+CREATE TRIGGER ensure_main AFTER INSERT ON recipe 
+FOR EACH ROW
+BEGIN
+
+     INSERT INTO needs_ingredients (name_of_ingredient,rec_name) 
+      VALUE (name_of_main_ingredient,rec_name);
+
+END
+//
+DELIMITER ; 
+
+
+DELIMITER // 
+CREATE TRIGGER already_exist_checker_on_ingredients BEFORE INSERT ON ingredients
+FOR EACH ROW 
+BEGIN 
+
+	IF ((SELECT COUNT(*) FROM ingredients WHERE NEW.name_of_ingredient = name_of_ingredient) != 0 )
+    THEN SIGNAL SQLSTATE '45000' 
+	SET MESSAGE_TEXT = 'Insertion denied!You are trying to insert an ingredient that has already been added.This is not allowed!'; 
+    END IF;
+
+END
+// 
+DELIMITER ;
+ 
+ 
