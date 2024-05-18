@@ -135,9 +135,10 @@ PRIMARY KEY(current_year,episode_number)
 CREATE TABLE cooks_recipes_per_episode(
 current_year INT(11) ,
 episode_number INT(11) ,
+national_cuisine VARCHAR(50),
 rec_name VARCHAR(50),
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id),
+PRIMARY KEY (current_year,episode_number,national_cuisine), /*cook_id dont make sense = > National Cuisine makes*/ 
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
 CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
@@ -173,8 +174,23 @@ CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_num
 CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
 
+Create table national_cuisine(
+name_national varchar(50),
+primary key (name_national)
+);
+
 
 DELIMITER // 
+Create trigger before_insert_cooks_belomgs_to_national_cuisine BEFORE INSERT ON cooks_belongs_to_national_cuisine
+FOR EACH ROW
+BEGIN 
+IF (Select count(*) from national_cuisine where name_national = NEW.type_of_national_cuisine_that_belongs_to) = 0 then Insert into national_cuisine(name_national) value (NEW.type_of_national_cuisine_that_belongs_toNEW.type_of_national_cuisine_that_belongs_to);
+END IF;
+END
+ //  
+ DELIMITER ;
+
+DELIMITER //
 CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
 FOR EACH ROW 
 BEGIN
@@ -183,10 +199,10 @@ IF NEW.date_of_birth != OLD.date_of_birth THEN
 SET NEW.age = TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
 END IF; 
 
-
 END
 //
 DELIMITER ; 
+
 
 
 DELIMITER //
@@ -259,5 +275,3 @@ BEGIN
 END
 // 
 DELIMITER ;
- 
- 
