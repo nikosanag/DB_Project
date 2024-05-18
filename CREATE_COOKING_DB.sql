@@ -249,29 +249,20 @@ DELIMITER ;
 
 
 
+drop trigger ensure_main
 DELIMITER // 
 CREATE TRIGGER ensure_main AFTER INSERT ON recipe 
 FOR EACH ROW
 BEGIN
 
-     INSERT INTO needs_ingredients (name_of_ingredient,rec_name) 
-      VALUE (name_of_main_ingredient,rec_name);
+     INSERT INTO needs_ingredient (name_of_ingredient,rec_name) 
+      VALUE (NEW.name_of_main_ingredient, NEW.rec_name);
 
 END
 //
 DELIMITER ; 
 
 
-DELIMITER // 
-CREATE TRIGGER already_exist_checker_on_ingredients BEFORE INSERT ON ingredients
-FOR EACH ROW 
-BEGIN 
 
-	IF ((SELECT COUNT(*) FROM ingredients WHERE NEW.name_of_ingredient = name_of_ingredient) != 0 )
-    THEN SIGNAL SQLSTATE '45000' 
-	SET MESSAGE_TEXT = 'Insertion denied!You are trying to insert an ingredient that has already been added.This is not allowed!'; 
-    END IF;
-
-END
-// 
-DELIMITER ;
+ 
+ 

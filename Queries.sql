@@ -866,9 +866,3 @@ JOIN food_group USING (name_of_food_group)
 
 
 
-
-
-
-
-
-
