@@ -68,10 +68,6 @@ CONSTRAINT f_key_tips_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 );
 
 
-
-
-
-
 CREATE TABLE equipment(
 equipment_name VARCHAR(50),
 instruction_manual VARCHAR(100),
