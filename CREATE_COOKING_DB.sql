@@ -178,7 +178,7 @@ IF NEW.date_of_birth != OLD.date_of_birth THEN
 SET NEW.age = TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
 END IF; 
 
-END
+END;
 //
 DELIMITER ; 
 
@@ -193,7 +193,7 @@ IF (SELECT COUNT(*) FROM tips WHERE New.rec_name = rec_name) = 3
 THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'ALREADY 3 TIPS';
 END IF; 
 
-END
+END;
 //
 DELIMITER ;
 
@@ -210,7 +210,7 @@ SET calories_per_portion = calories_per_portion + (
     WHERE name_of_ingredient = NEW.name_of_ingredient)
 WHERE rec_name = NEW.rec_name;
 
-END
+END;
 //
 DELIMITER ;
 
@@ -222,7 +222,7 @@ BEGIN
 
 SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
 
-END
+END;
 //
 DELIMITER ;
 
@@ -237,7 +237,7 @@ BEGIN
      INSERT INTO needs_ingredient (name_of_ingredient,rec_name) 
      VALUE (NEW.name_of_main_ingredient, NEW.rec_name);
 
-END
+END;
 //
 DELIMITER ; 
 
