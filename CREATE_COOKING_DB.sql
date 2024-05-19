@@ -168,23 +168,7 @@ PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
 CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
-/*
-Create table national_cuisine(
-name_national varchar(50),
-primary key (name_national)
-);
 
-
-DELIMITER // 
-Create trigger before_insert_cooks_belomgs_to_national_cuisine BEFORE INSERT ON cooks_belongs_to_national_cuisine
-FOR EACH ROW
-BEGIN 
-IF (Select count(*) from national_cuisine where name_national = NEW.type_of_national_cuisine_that_belongs_to) = 0 then Insert into national_cuisine(name_national) value (NEW.type_of_national_cuisine_that_belongs_toNEW.type_of_national_cuisine_that_belongs_to);
-END IF;
-END
- //  
- DELIMITER ;
-*/
 DELIMITER //
 CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
 FOR EACH ROW 

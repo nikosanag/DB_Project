@@ -81,13 +81,14 @@ END;
 //
 DELIMITER;
 
+
 DELIMITER // 
 CREATE PROCEDURE build_the_contest(IN starting_year INT,end_year INT) 
 BEGIN
 DECLARE count INT; 
 DECLARE count_inside INT; 
 SET count = starting_year ; 
- 
+
 while (count<end_year+1) DO
 	BEGIN
     SET count_inside = 0;    
