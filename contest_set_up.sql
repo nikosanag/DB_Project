@@ -1,5 +1,22 @@
 SET SQL_SAFE_UPDATES = 0;
 
+Create table national_cuisine(
+name_national varchar(50),
+primary key (name_national)
+);
+
+INSERT INTO national_cuisine 
+SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine;
+
+CREATE TABLE cooks_recipes_per_episode_(
+current_year INT(11) ,
+episode_number INT(11) ,
+national_cuisine VARCHAR(11),
+rec_name VARCHAR(50),
+cook_id INT(11),
+PRIMARY KEY (current_year,episode_number,national_cuisine) 
+); 
+
 CREATE TABLE security_purposes(
 	cook_id INT(11),
 	triggering_number INT(11),
@@ -45,7 +62,7 @@ BEGIN
 	INSERT INTO available_cooks(cook_id,type_of_national_cuisine_that_belongs_to) SELECT cook_id,type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine ORDER BY RAND() ; 
     INSERT INTO available_recipes(rec_name,national_cuisine) SELECT rec_name,national_cuisine FROM recipe ORDER BY RAND() ;
 
-	INSERT INTO cooks_recipes_per_episode (current_year,episode_number,national_cuisine)
+	INSERT INTO cooks_recipes_per_episode_ (current_year,episode_number,national_cuisine)
 	SELECT requested_year,requested_episode,name_national
 	FROM national_cuisine
 	ORDER BY RAND()	
@@ -83,13 +100,23 @@ while (count<end_year+1) DO
 	SET count = count +1 ; 
 	END; 
     END WHILE;
+
+
+INSERT INTO cooks_recipes_per_episode (current_year,episode_number,rec_name,cook_id)
+SELECT current_year , episode_number , rec_name , cook_id 
+FROM cooks_recipes_per_episode_ ;
+DROP TABLE cooks_recipes_per_episode_;
+DROP TABLE national_cuisine; 
+DROP TABLE security_purposes; 
+DROP TABLE available_recipes;
+DROP TABLE available_cooks; 
 END;
 //
 DELIMITER ;
 
 
 DELIMITER // /*SUPER IMPORTANT for inserting recipes and cooks...open on your own risk...I warned you!*/
-CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode
+CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode_
 FOR EACH ROW
 BEGIN
 

@@ -131,10 +131,9 @@ PRIMARY KEY(current_year,episode_number)
 CREATE TABLE cooks_recipes_per_episode(
 current_year INT(11) ,
 episode_number INT(11) ,
-national_cuisine VARCHAR(50),
 rec_name VARCHAR(50),
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,national_cuisine), /*cook_id dont make sense = > National Cuisine makes*/ 
+PRIMARY KEY (current_year,episode_number,cook_id), /*cook_id dont make sense = > National Cuisine makes*/ 
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
 CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
@@ -169,7 +168,7 @@ PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
 CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
-
+/*
 Create table national_cuisine(
 name_national varchar(50),
 primary key (name_national)
@@ -185,7 +184,7 @@ END IF;
 END
  //  
  DELIMITER ;
-
+*/
 DELIMITER //
 CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
 FOR EACH ROW 
@@ -252,7 +251,7 @@ FOR EACH ROW
 BEGIN
 
      INSERT INTO needs_ingredient (name_of_ingredient,rec_name) 
-      VALUE (NEW.name_of_main_ingredient, NEW.rec_name);
+     VALUE (NEW.name_of_main_ingredient, NEW.rec_name);
 
 END
 //
