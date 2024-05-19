@@ -5,8 +5,7 @@ name_national varchar(50),
 primary key (name_national)
 );
 
-INSERT INTO national_cuisine 
-SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine;
+
 
 CREATE TABLE cooks_recipes_per_episode_(
 current_year INT(11) ,
@@ -89,6 +88,11 @@ DECLARE count INT;
 DECLARE count_inside INT; 
 SET count = starting_year ; 
 
+
+INSERT INTO national_cuisine 
+SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine;
+
+
 while (count<end_year+1) DO
 	BEGIN
     SET count_inside = 0;    
@@ -106,11 +110,11 @@ while (count<end_year+1) DO
 INSERT INTO cooks_recipes_per_episode (current_year,episode_number,rec_name,cook_id)
 SELECT current_year , episode_number , rec_name , cook_id 
 FROM cooks_recipes_per_episode_ ;
-DROP TABLE cooks_recipes_per_episode_;
-DROP TABLE national_cuisine; 
-DROP TABLE security_purposes; 
-DROP TABLE available_recipes;
-DROP TABLE available_cooks; 
+DELETE FROM cooks_recipes_per_episode_;
+DELETE FROM national_cuisine; 
+DELETE FROM security_purposes; 
+DELETE FROM available_recipes;
+DELETE FROM available_cooks; 
 END;
 //
 DELIMITER ;
