@@ -2,48 +2,50 @@ import mysql.connector
 import random
 from faker import Faker
 from faker_food import FoodProvider
+from datetime import datetime
 data = Faker()
 data.add_provider(FoodProvider)
 
 
-INGREDIENTS = 300
+INGREDIENTS = 400
 FOOD_GROUPS = 12
-COOKS = 500
+COOKS = 200
+RECIPES = 300
 
 
 
-#--------------------------------------------- FOOD GROUP ---------------------------------------------
-# NAME
+#--------------------------------------------- FOOD GROUPS ---------------------------------------------
+# NAME  --  primary key
 name_of_food_group = [
-                      "Spices and essential oils",
-                      "Coffee, tea and their products",
-                      "Preserved foods", "Sweeteners", 
-                      "Fats and oils", "Milk, eggs and their products",
-                      "Meat and its products", "Fish and their products",
-                      "Cereals and their products",
-                      "Various foods of plant origin", 
-                      "Products with sweeteners", "Various drinks"
-                      ]
+  "Spices and essential oils",
+  "Coffee, tea and their products",
+  "Preserved foods", "Sweeteners", 
+  "Fats and oils", "Milk, eggs and their products",
+  "Meat and its products", "Fish and their products",
+  "Cereals and their products",
+  "Various foods of plant origin", 
+  "Products with sweeteners", "Various drinks"
+]
 
 # GROUP DESCRIPTION
 description_of_food_group = []
-for i in range (11):
+for i in range (FOOD_GROUPS):
   description_of_food_group.append(data.unique.sentence())
 
 # RECIPE DESCRIPTION
 recipe_description = [
-    "Seafood",
-    "Poultry",
-    "Meat",
-    "Vegetarian/Vegan",
-    "Vegetable-Based",
-    "Fruit-Based",
-    "Grain-Based",
-    "Dairy-Based",
-    "Nut and Seed-Based",
-    "Egg-Based",
-    "Legume-Based",
-    "Mushroom-Based"
+  "Seafood",
+  "Poultry",
+  "Meat",
+  "Vegetarian/Vegan",
+  "Vegetable-Based",
+  "Fruit-Based",
+  "Grain-Based",
+  "Dairy-Based",
+  "Nut and Seed-Based",
+  "Egg-Based",
+  "Legume-Based",
+  "Mushroom-Based"
 ]
 # -----------------------------------------------------------------------------------------------------
 
@@ -51,20 +53,325 @@ recipe_description = [
 
 
 #-------------------------------------------- INGREDIENTS ---------------------------------------------
-# NAME
+# NAME  --  primary key
 name_of_ingredient = []
-for i in range(INGREDIENTS - 1):
-  name_of_ingredient.append(data.unique.ingredient())
+for i in range(INGREDIENTS):
+  dice = random.randint(1,11)
+  if dice > 4:
+    name_of_ingredient.append(data.unique.ingredient())
+  elif dice <= 2:
+    name_of_ingredient.append(data.unique.fruit())
+  else:
+    name_of_ingredient.append(data.unique.sushi())
 
 # CALORIES PER 100g
 calories_per_100gr = []
-for i in range(INGREDIENTS - 1):
+for i in range(INGREDIENTS):
   calories_per_100gr.append(random.randint(15, 650))
+
+# NAME OF FOOD GROUP  --  foreign key references FOOD GROUP
+ingredient_of_food_group = []
+for i in range(INGREDIENTS):
+  ingredient_of_food_group.append(random.choice(name_of_food_group))
 
 # -----------------------------------------------------------------------------------------------------
 
 
 
+
+#------------------------------------------------ RECIPES ---------------------------------------------
+# NAME  --  primary key
+names1 = ["Jamaican Jerk Chicken", "Pasta Salad", "Lasagna", "Hearty Pancakes", "Summer Garden Couscous Salad", "Squash Corn Chowder", "White beans, tomatoes, and spinach", "Spaghetti", "Scones", "Stir-Fry", "Rustic Italian Tortellini Soup", "Swedish Meatballs", "Barley Beef Skillet", "Southwest Beef & Rice Skillet", "Glazed Pork Chops with Corn Bread Dressing", "Fried Rice", "Zesty Sausage & Beans", "Prosciutto Pasta Toss", "Cashew Chicken with Noodles", "Herb Chicken with Honey Butter", "French Toast", "Swedish Pancakes", "Baked Cheddar Eggs & Potatoes", "Baked Mostaccioli", "Ravioli with Snap Peas", "Cloverleaf Rolls", "Greek Yogurt and Honey Blueberry Muffins", "Whole Grain Waffles", "Lemon Bars", "Qahaq Cookies", "Blondies with Nutella", "Hot Chocolate", "Chocolate Mousse", "S'mores Cookie Bars", "Orange Chicken", "Tostadas", "Black Bean Stuffed Sweet Potatoes", "Asian Shredded Beef", "Capellini with sausage, spinach, and jalapeno", "Crispy Chicken with Kale", "Roast Chicken Grain Bowl", "Chicken thighs with barley and peas", "Rice noodles with meatballs and bok choy", "Paprika Pork with Roasted Potatoes and Dill Cream", "Chicken cutlets with carrot and kale salad", "Gnocchi and sweet potatoes", "Shepherd's Pie", "Garlic Parmesan Chicken", "Turkey Pot Pie", "Balsamic Bacon Brussels Sprouts", "Lemon Red Potatoes", "Potato and Corn Chowder", "Thai Chicken", "Italian Fagoli Vegetable Soup", "Blueberry Pie", "Chocolate Pudding", "Browned Butter Beets", "Turkey Soup with Homemade Noodles", "Home fries", "Chocolate Raspberry Torte", "Golden Latte", "Fig Shake", "Lentil Soup", "Buckwheat Tabboulah", "Lentil Rice Bowls with Egg", "Italian Vegetable Lentil Soup", "One Pot Chicken & Potatoes", "Sweet Korean Lentils", "Buckwheat Beetroot Salad", "New Potato Lentil Salad", "Ham & Potato Soup", "Lemon Dill Potatoes", "BBQ Lentils", "Healthy Buckwheat Soup", "Buckwheat Chicken Pilaf", "Vegetable Noodle Soup", "Bacon and Honey Potato Salad", "Pretzel Sticks", "Golden French Lentil Soup", "Lentil Shepherd's Pie", "Honey Lime Chicken", "Lentil Curry", "Dutch Oven Bread", "Potato Apple Roast", "Baking Powder Biscuits", "Sugar Cookies", "Potato Curry", "Bucatini all'Amatriciana", "Brioche Chocolate Rolls", "Naan", "Lemon Poppy Seed Scones", "Balsamic Dijon Root Vegetables", "Best Baked Chicken Legs", "Spanish Lentil Soup", "Chocolate Chip Irish Soda Bread", "Malteese Gilatti", "Buckwheat Carrot and Onion", "Sweet Potatoes with Yogurt and Chickpeas", "Spanish Chickpeas", "Lemon Fettuchini", "Chickpea Masala", "Chickpea Broccoli Pesto", "Thai Veggie Soup", "Buttery Herb Chicken", "Rosemary Parsnips", "Balsamic Potatoes and Asparagus", "Quinoa Brussels Sweet Potato Salad", "Thai Peanut Cabbage Quinoa", "Lemon Garlic Asparagus with Orzo", "Moroccan Sweet Potato Lentil Stew", "Chia Crusted Salmon", "Pinto Beans and Tomatillo Cilantro Lime Rice", "Thai Squash Soup", "Roasted Carrot & Peanut Sauce", "Majoram White Wine Chicken", "Marjoram Carrots", "Soy Mustard Salmon", "Chive Butter Radishes", "Mango Chutney", "Vegetarian Chili", "Sweet Potato Breakfast Burritos", "Roasted Sweet Potato Lentil Salad", "Cornbread", "Brussel Honey Lentil Quinoa", "Lentil Sweet Potato Curry", "Gnocci and white beans", "Pad Thai", "Kung Pao Chicken", "Mediterranean Tuna Steaks", "Spicy Black Bean Nachos", "Tomato Basil Soup", "Chewy Chocolate Chip Cookies", "Quinoa Peanut Kale Curry", "Sweet Potato Lentil Curry with Pickled Onion", "Sardine Mediterranean Pasta", "Prosciutto apple flatbread pizza", "Dill Cucumber Salmon", "Vegetable Couscous", "Talapia Tacos", "Roasted Mackerel", "Lentil Salsa Soup", "Pesto Tomato Penne", "Black Bean Soup", "Balsamic Pork Chops"]
+names2 = ["Spaghetti Carbonara", "Chicken Alfredo", "Beef Stroganoff", "Vegetable Stir Fry", "Chicken Tikka Masala", "Fish Tacos", "Pulled Pork Sandwiches", "Eggplant Parmesan", "Caesar Salad", "Shrimp Scampi", "Chicken Pot Pie", "Lamb Gyros", "Beef Wellington", "Vegetable Lasagna", "Pad Thai", "Butternut Squash Soup", "Grilled Cheese Sandwich", "Mushroom Risotto", "Chicken Quesadilla", "Turkey Club Sandwich", "Margherita Pizza", "Lobster Bisque", "Baked Ziti", "Beef Tacos", "Chicken Caesar Wrap", "Salmon Teriyaki", "Clam Chowder", "BBQ Ribs", "Falafel Wrap", "Stuffed Peppers", "Chicken Curry", "Ratatouille", "Greek Salad", "Cheeseburger", "Vegetable Curry", "Pulled Chicken", "Spinach Quiche", "Pasta Primavera", "Chicken Fajitas", "Tom Yum Soup", "Beef Burritos", "Chicken Wings", "Egg Salad Sandwich", "Beef Enchiladas", "Minestrone Soup", "Stuffed Mushrooms", "Lamb Kebabs", "Chicken Satay", "Gnocchi with Pesto", "Vegetarian Chili", "Steak Frites", "Chicken Parmesan", "Pork Schnitzel", "Grilled Shrimp", "Tuna Salad", "Vegetable Samosas", "Chicken Piccata", "French Onion Soup", "Lamb Shank", "Seafood Paella", "Spinach and Artichoke Dip", "BBQ Chicken Pizza", "Vegetarian Pizza", "Stuffed Cabbage Rolls", "Shrimp Fried Rice", "Shepherd’s Pie", "Chicken Alfredo Pasta", "Garlic Butter Shrimp", "Tomato Basil Soup", "Beef Bourguignon", "Chicken Noodle Soup", "Grilled Salmon", "Pork Tenderloin", "Chicken Cordon Bleu", "Eggplant Rollatini", "Vegetable Quesadilla", "Spaghetti Bolognese", "Tuna Casserole", "Vegetarian Tacos", "Beef and Broccoli", "Chicken Tenders", "Shrimp Tacos", "French Toast", "Beef Stew", "Chicken Shawarma", "Vegetable Soup", "Lamb Chops", "Cauliflower Steak", "Chicken Burritos", "Crab Cakes", "Tortellini Alfredo", "Vegetable Paella", "Baked Salmon", "Beef Kebabs", "Chicken Marsala", "Margarita Chicken", "Lentil Soup", "Beef Chili", "Vegetable Biryani", "Clam Linguine", "Chicken Chimichangas", "Pulled Pork Tacos", "Stuffed Shells", "Chicken Pad Thai", "Grilled Chicken Salad", "Tomato Soup", "Beef Meatballs", "Vegetable Spring Rolls", "Chicken Katsu", "Shrimp Pad Thai", "Stuffed Portobello Mushrooms", "Pulled Chicken Tacos", "Salmon Salad", "Spinach Lasagna", "Chicken and Dumplings", "Vegetable Stir-Fried Noodles"]
+for i in range(37):
+  names1.append(data.unique.dish())
+names3 = names1 + names2
+rec_name = list(set(names3))[:RECIPES]
+
+# TYPE
+types = ['Pastry','Regular']
+rec_type = []
+for i in range(RECIPES):
+  dice = random.randint(1, 10)
+  if dice <= 7:
+    rec_type.append(types[1])
+  else:
+    rec_type.append(types[0])
+
+# DIFFICULTY
+level_of_diff = []
+for i in range(RECIPES):
+  level_of_diff.append(random.randint(1, 5))
+
+# DESCRIPTION
+short_descr = []
+for i in range(RECIPES // 2):
+  short_descr.append(data.dish_description())
+for i in range(RECIPES - (RECIPES // 2)):
+  short_descr.append(data.sentence())
+
+# PREPARATION TIME 
+prep_time = []
+for i in range(RECIPES):
+  prep_time.append(random.randint(20, 70))
+
+# COOKING TIME 
+cooking_time = []
+for i in range(RECIPES):
+  cooking_time.append(random.randint(30, 100))
+
+# PORTIONS
+portions = []
+for i in range(RECIPES):
+  portions.append(random.randint(1,4))
+
+# MAIN INGREDIENT  --  foreign key references INGREDIENTS
+name_of_main_ingredient = []
+for i in range(RECIPES):
+  name_of_main_ingredient.append(random.choice(name_of_ingredient))
+
+# FAT
+grams_of_fat_per_portion = []
+for i in range(RECIPES):
+  grams_of_fat_per_portion.append(random.randint(5, 30))
+
+# CARBONHYDRATES
+grams_of_carbohydrates_per_portion = []
+for i in range(RECIPES):
+  grams_of_carbohydrates_per_portion.append(random.randint(10, 50))
+
+# PROTEIN
+grams_of_proteins_per_portion = []
+for i in range(RECIPES):
+  grams_of_proteins_per_portion.append(random.randint(10, 45))
+
+# NATIONAL CUISINE
+national_cuisine = []
+existing_cuisines = set()
+for i in range(RECIPES):
+  x = data.ethnic_category()
+  national_cuisine.append(x)
+  existing_cuisines.add(x)
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------- NEEDS INGREDIENT -----------------------------------------
+# RECIPE i NEEDS LIST OF (INGREDIENT, QUANTITY)
+recipe_needs_ingredient = []
+for i in range(RECIPES):
+  recipe_needs_ingredient.append([])
+
+for i in range(RECIPES):  #inserting main ingredient
+  main = name_of_main_ingredient[i]
+  dice = random.randint(1, 2)
+  if dice == 1:
+    m = data.measurement()
+  else:
+    m = data.metric_measurement()
+  quantity = data.measurement_size() + ' ' + m
+  recipe_needs_ingredient[i].append((main, quantity))
+
+for i in range(RECIPES):
+  rng = random.randint(5, 16)
+  for j in range(rng):
+    ing = random.choice(name_of_ingredient)
+    if ing in recipe_needs_ingredient[i]:
+      continue
+    dice = random.randint(1, 2)
+    if dice == 1:
+      m = data.measurement()
+    else:
+      m = data.metric_measurement()
+    quantity = data.measurement_size() + ' ' + m
+    append_value = (ing, quantity)
+    recipe_needs_ingredient[i].append(append_value)
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#--------------------------------------------- TYPE OF MEAL -------------------------------------------
+# RECIPE i HAS LIST OF MEAL TYPES
+type_of_meal = ["Breakfast", "Lunch", "Dinner", "Supper", "Elevenses", "Tiffin", "Banquet"]
+recipe_has_meal_type = []
+for i in range(RECIPES):
+  recipe_has_meal_type.append([])
+
+for i in range(RECIPES):
+  recipe_has_meal_type[i].append(random.sample(type_of_meal, random.randint(1, len(type_of_meal))))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------- TAGS -----------------------------------------------
+# RECIPE i HAS LIST OF TAGS
+tags = ["Main Dish", "Salad", "Brunch", "Baking", "Dessert", "Snack", "Cold Dish", "Hot Dish", "Quick-Lunch"]
+
+recipe_has_tag = []
+for i in range(RECIPES):
+  recipe_has_tag.append([])
+
+for i in range(RECIPES):
+  recipe_has_tag[i].append(random.sample(tags, random.randint(1, len(tags))))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------- TIPS -----------------------------------------------
+# RECIPE i HAS LIST OF TIPS
+tips = ["Make dough long before", "Use half whole wheat flour", "Add bacon", "Whisk on stove until thick", "Roast for long", "Use more buckwheat", "Add rice in after 15 minutes and use more water", "Don't cook bacon too long", "Flip pretzel sticks half way through", "Doesn't use the stove!  Sear chicken skin longer (+5 minutes)", "Bake at 180 for 25 min with lid and 15 min without", "Use less tomato, more cream", "Don't fry too long", "Burns in an enamel pot", "Can use enamel pot instead of skillet", "Hard to get them toasty", "Don't forget to make Naan dough ahead of time", "Can throw in carrots as well", "Potatoes for 25 min then aspargus for 15 min", "Use less spices to allow mango and feta flavors more room", "Combined two rexpies, use 1 c lentils, 3 sweet potatoes and add more celery and spinach.", "Also use 1/4 tsp each paprika and cumin in dressing.", "Would be better with chicken breast, not legs", "Make some rice to go with it"]
+
+recipe_has_tip = []
+for i in range(RECIPES):
+  recipe_has_tip.append([])
+
+for i in range(RECIPES):
+  recipe_has_tip[i].append(random.sample(tips, random.randint(0, 3)))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#---------------------------------------------- EQUIPMENT ---------------------------------------------
+# NAME  --  primary key 
+equipment_name = ["Air fryer", "Bachelor griller", "Barbecue grill", "Beehive oven", "Blender", "Bowl" , "Brasero", "Brazier", "Bread machine", "Burjiko", "Butane torch", "Chapati maker", "Cheesemelter", "Chocolatera", "Chiller" , "Chorkor oven", "Clome oven", "Comal (cookware)", "Combi steamer", "Communal oven", "Convection microwave", "Convection oven", "Corn roaster", "Crepe maker", "Deep fryer", "Earth oven", "Electric cooker", "Espresso machine", "Field kitchen", "Fire pot", "Flattop grill", "Food steamer", "Fufu machine", "Grater" ,"Griddle", "Halogen oven", "Haybox", "Hibachi", "Horno", "Hot box (appliance)", "Hot plate", "Instant Pot", "Kamado", "Kitchener range", "Kujiejun", "Kyoto box", "Makiyakinabe", "Masonry oven", "Mess kit", "Microwave oven", "Multicooker", "Oven", "On2cook", "Pan", "Pancake machine", "Panini sandwich grill", "Popcorn maker", "Pressure cooker", "Pressure fryer", "Reflector oven", "Remoska", "Rice cooker", "Rice polisher", "Roasting jack", "Rocket mass heater", "Rotimatic", "Rotisserie", "Russian oven", "Sabbath mode", "Salamander broiler", "Samovar", "Sandwich toaster", "Self-cleaning oven", "Shichirin", "Slow cooker", "Solar cooker", "Sous-vide cooker", "Soy milk maker", "Stove", "Susceptor", "Tabun oven", "Tandoor", "Tangia", "Thermal immersion circulator", "Toaster and toaster ovens", "Turkey fryer", "Vacuum fryer", "Waffle iron", "Wet grinder", "Wine cooler", "Wood-fired oven", "Coffee percolator", "Coffeemaker", "Electric water boiler", "Instant hot water dispenser", "Kettle"]
+
+# MANUAL
+instruction_manual = []
+for i in range(len(equipment_name)):
+  instruction_manual.append(data.sentence() + ' ' + data.sentence() + ' ' + data.sentence())
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#-------------------------------------------- USES EQUIPMENT ------------------------------------------
+# RECIPE i USES LIST OF EQUIPMENT
+recipe_uses_equipment = []
+
+for i in range(RECIPES):
+  recipe_uses_equipment.append([])
+
+for i in range(RECIPES):
+  recipe_uses_equipment[i].append(random.sample(equipment_name, random.randint(4, 10)))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------- STEP -----------------------------------------------
+# INSTRUCTIONS
+instructions = ["Preheat the oven to 350°F (175°C).", "Mix flour, sugar, and eggs in a bowl.", "Add butter and milk to the mixture.", "Pour the batter into a greased baking pan.", "Bake for 25-30 minutes until golden brown.", "Let it cool before serving.", "Chop the vegetables into small pieces.", "Heat oil in a pan over medium heat.", "Add garlic and onions to the pan.", "Stir in the vegetables and cook for 5-7 minutes.", "Season with salt and pepper.", "Serve hot.", "Boil water in a large pot.", "Add pasta to the boiling water.", "Cook for 8-10 minutes until al dente.", "Drain the pasta and set aside.", "Heat sauce in a separate pan.", "Combine pasta and sauce, and mix well.", "Serve with grated cheese on top.", "Marinate the chicken with spices and yogurt.", "Let it sit for at least 30 minutes.", "Heat oil in a large skillet over medium-high heat.", "Add the chicken to the skillet and cook for 6-8 minutes per side.", "Reduce the heat and let it simmer for 15 minutes.", "Garnish with fresh cilantro before serving.", "Rinse the rice under cold water until the water runs clear.", "Combine rice and water in a pot.", "Bring to a boil, then reduce heat to low.", "Cover and simmer for 18-20 minutes.", "Remove from heat and let it stand covered for 5 minutes.", "Fluff the rice with a fork before serving."]
+
+# RECIPE i FOLLOWS LIST OF (STEP_NUM, INSTRUCTIONS)
+recipe_follows_steps = []
+for i in range(RECIPES):
+  recipe_follows_steps.append([])
+
+for i in range(RECIPES):
+  rng = random.randint(7, 25)
+  for j in range(rng):
+    append_value = (j + 1, random.choice(instructions))
+    recipe_follows_steps[i].append(append_value)
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#-------------------------------------------- THEMATIC UNIT -------------------------------------------
+# NAME
+name_of_thematic_unit = ["Thanksgiving desserts", "Christmas desserts", "Easter desserts", "Risotto dishes", "Summer salads", "Holiday appetizers", "Breakfast smoothies", "Pasta salads", "Picnic sandwiches", "Grilled vegetable dishes", "Baked goods", "Soup varieties", "Smoothie bowls", "Healthy snack options", "One-pot meals", "Casserole dishes", "Brunch items", "Quick stir-fries", "Frozen desserts", "Energy bites", "Sheet pan dinners", "Fruit salads", "Cold noodle dishes", "Barbecue sides", "Chilled soups", "Grain bowls", "Savory tarts", "Hot pot dishes", "Oven-roasted vegetables", "Finger foods"]
+
+# DESCRIPTION
+descriptions = ["Delicious desserts traditionally enjoyed during the Easter holiday.", "Creamy and flavorful rice dishes made with a variety of ingredients.", "Refreshing salads that are perfect for the hot summer months.", "Appetizers that are often served during holiday gatherings and parties.", "Nutritious and tasty smoothies perfect for a quick and healthy breakfast.", "Cold salads made with pasta and a variety of other ingredients.", "Sandwiches that are easy to pack and enjoy during a picnic.", "Vegetable dishes that are cooked on the grill for a delicious smoky flavor.", "Various baked treats such as cakes, cookies, and bread.", "Different types of soups, perfect for warming up on a chilly day.", "Thicker smoothies served in a bowl and topped with various fruits and nuts.", "Nutritious snacks that are both delicious and good for you.", "Meals that are cooked in a single pot for easy cleanup and convenience.", "Baked dishes made with a variety of ingredients, often topped with cheese or breadcrumbs.", "Dishes typically enjoyed during a late-morning meal combining breakfast and lunch.", "Fast and flavorful dishes made by quickly frying ingredients in a hot pan.", "Cold and sweet treats perfect for a hot day.", "Small, nutritious snacks packed with energy-boosting ingredients.", "Complete meals cooked on a single sheet pan in the oven.", "Colorful salads made with a variety of fresh fruits.", "Chilled noodle dishes often served with a flavorful sauce.", "Side dishes that complement grilled meats and vegetables.", "Soups that are served cold, ideal for hot summer days.", "Various dips and spreads served with bread, crackers, or vegetables.", "Nourishing bowls made with grains, vegetables, and protein.", "Delicious tarts filled with savory ingredients like cheese, vegetables, or meat.", "Comforting dishes cooked at the dining table in a simmering pot of broth.", "Vegetables roasted in the oven for a delicious caramelized flavor.", "Small, easy-to-eat foods that are perfect for parties and gatherings.", "Refreshing juice blends made from various fruits and vegetables."]
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#--------------------------------------- BELONGS TO THEMATIC UNIT -------------------------------------
+recipe_belongs_to_thematic_unit = []
+for i in range(RECIPES):
+  recipe_belongs_to_thematic_unit.append([])
+
+for i in range(RECIPES):
+  recipe_belongs_to_thematic_unit[i].append(random.sample(name_of_thematic_unit, random.randint(1, 7)))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------ COOKS -----------------------------------------------
+# ID  --  primary key
+cook_id = []
+for _ in range(COOKS):
+  cook_id.append(data.unique.random_int(1, COOKS))
+
+# NAME, SURNAME
+name_of_cook = []
+surname_of_cook = []
+for _ in (COOKS):
+  full_name = (data.name()).split()
+  name_of_cook.append(full_name[0])
+  surname_of_cook.append(full_name[1])
+
+# PHONE NUMBER
+phone_number = []
+for i in range(COOKS):
+  num = "69"
+  for j in range(8):
+    num += str(random.randint(0,9))
+  phone_number.append(num)
+
+# DATE OF BIRTH, YEARS OF EXPERIENCE
+date_of_birth = []
+years_of_experience = []
+date1 = datetime(1960, 1, 1)
+date2 = datetime(2006, 12, 12)
+for _ in range(COOKS):
+  b = data.date_between_dates(date1, date2)
+  a = 2024 - b.year
+  years_of_experience.append(random.randint(1, a - 18))
+  date_of_birth.append(str(b))
+
+# CATEGORY
+categories = ['C Cook', 'B Cook', 'A Cook', 'Chef', "Chef's Assistant"]
+cook_category = []
+for _ in range(COOKS):
+  cook_category.append(random.choice(categories))
+# -----------------------------------------------------------------------------------------------------
+
+
+
+
+#---------------------------------- COOK BELONGS TO NATIONAL CUISINE ----------------------------------
+# COOK (with id) i BELONGS TO LIST OF NATIONAL CUISINES
+cooks_belongs_to_national_cuisine = []
+c = list(existing_cuisines)
+for _ in range(COOKS):
+  cooks_belongs_to_national_cuisine.append([])
+
+for cuisine in existing_cuisines:
+  cooks_to_assign = random.sample(cook_id, 3)
+  for cook in cooks_to_assign:
+    cooks_belongs_to_national_cuisine[cook].append(cuisine)
+
+for cook in cooks_belongs_to_national_cuisine:
+  if cook == []:
+    rng = random.randint(1, 5)
+    for i in range(rng):
+      cook.append(random.choice(c))
+
+# for i in range(COOKS):
+#   rng = random.randint(1, 5)
+#   for j in range(rng):
+#     cook_belongs_to_national_cuisine[i].append(random.choice(c))
+    
+# -----------------------------------------------------------------------------------------------------
 
 db = mysql.connector.connect(
   host = "localhost",
