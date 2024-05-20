@@ -56,13 +56,8 @@ recipe_description = [
 # NAME  --  primary key
 name_of_ingredient = []
 for i in range(INGREDIENTS):
-  dice = random.randint(1,11)
-  if dice > 4:
-    name_of_ingredient.append(data.unique.ingredient())
-  elif dice <= 2:
-    name_of_ingredient.append(data.unique.fruit())
-  else:
-    name_of_ingredient.append(data.unique.sushi())
+  name_of_ingredient.append(data.unique.ingredient())
+
 
 # CALORIES PER 100g
 calories_per_100gr = []
@@ -82,7 +77,7 @@ for i in range(INGREDIENTS):
 #------------------------------------------------ RECIPES ---------------------------------------------
 # NAME  --  primary key
 names1 = ["Jamaican Jerk Chicken", "Pasta Salad", "Lasagna", "Hearty Pancakes", "Summer Garden Couscous Salad", "Squash Corn Chowder", "White beans, tomatoes, and spinach", "Spaghetti", "Scones", "Stir-Fry", "Rustic Italian Tortellini Soup", "Swedish Meatballs", "Barley Beef Skillet", "Southwest Beef & Rice Skillet", "Glazed Pork Chops with Corn Bread Dressing", "Fried Rice", "Zesty Sausage & Beans", "Prosciutto Pasta Toss", "Cashew Chicken with Noodles", "Herb Chicken with Honey Butter", "French Toast", "Swedish Pancakes", "Baked Cheddar Eggs & Potatoes", "Baked Mostaccioli", "Ravioli with Snap Peas", "Cloverleaf Rolls", "Greek Yogurt and Honey Blueberry Muffins", "Whole Grain Waffles", "Lemon Bars", "Qahaq Cookies", "Blondies with Nutella", "Hot Chocolate", "Chocolate Mousse", "S'mores Cookie Bars", "Orange Chicken", "Tostadas", "Black Bean Stuffed Sweet Potatoes", "Asian Shredded Beef", "Capellini with sausage, spinach, and jalapeno", "Crispy Chicken with Kale", "Roast Chicken Grain Bowl", "Chicken thighs with barley and peas", "Rice noodles with meatballs and bok choy", "Paprika Pork with Roasted Potatoes and Dill Cream", "Chicken cutlets with carrot and kale salad", "Gnocchi and sweet potatoes", "Shepherd's Pie", "Garlic Parmesan Chicken", "Turkey Pot Pie", "Balsamic Bacon Brussels Sprouts", "Lemon Red Potatoes", "Potato and Corn Chowder", "Thai Chicken", "Italian Fagoli Vegetable Soup", "Blueberry Pie", "Chocolate Pudding", "Browned Butter Beets", "Turkey Soup with Homemade Noodles", "Home fries", "Chocolate Raspberry Torte", "Golden Latte", "Fig Shake", "Lentil Soup", "Buckwheat Tabboulah", "Lentil Rice Bowls with Egg", "Italian Vegetable Lentil Soup", "One Pot Chicken & Potatoes", "Sweet Korean Lentils", "Buckwheat Beetroot Salad", "New Potato Lentil Salad", "Ham & Potato Soup", "Lemon Dill Potatoes", "BBQ Lentils", "Healthy Buckwheat Soup", "Buckwheat Chicken Pilaf", "Vegetable Noodle Soup", "Bacon and Honey Potato Salad", "Pretzel Sticks", "Golden French Lentil Soup", "Lentil Shepherd's Pie", "Honey Lime Chicken", "Lentil Curry", "Dutch Oven Bread", "Potato Apple Roast", "Baking Powder Biscuits", "Sugar Cookies", "Potato Curry", "Bucatini all'Amatriciana", "Brioche Chocolate Rolls", "Naan", "Lemon Poppy Seed Scones", "Balsamic Dijon Root Vegetables", "Best Baked Chicken Legs", "Spanish Lentil Soup", "Chocolate Chip Irish Soda Bread", "Malteese Gilatti", "Buckwheat Carrot and Onion", "Sweet Potatoes with Yogurt and Chickpeas", "Spanish Chickpeas", "Lemon Fettuchini", "Chickpea Masala", "Chickpea Broccoli Pesto", "Thai Veggie Soup", "Buttery Herb Chicken", "Rosemary Parsnips", "Balsamic Potatoes and Asparagus", "Quinoa Brussels Sweet Potato Salad", "Thai Peanut Cabbage Quinoa", "Lemon Garlic Asparagus with Orzo", "Moroccan Sweet Potato Lentil Stew", "Chia Crusted Salmon", "Pinto Beans and Tomatillo Cilantro Lime Rice", "Thai Squash Soup", "Roasted Carrot & Peanut Sauce", "Majoram White Wine Chicken", "Marjoram Carrots", "Soy Mustard Salmon", "Chive Butter Radishes", "Mango Chutney", "Vegetarian Chili", "Sweet Potato Breakfast Burritos", "Roasted Sweet Potato Lentil Salad", "Cornbread", "Brussel Honey Lentil Quinoa", "Lentil Sweet Potato Curry", "Gnocci and white beans", "Pad Thai", "Kung Pao Chicken", "Mediterranean Tuna Steaks", "Spicy Black Bean Nachos", "Tomato Basil Soup", "Chewy Chocolate Chip Cookies", "Quinoa Peanut Kale Curry", "Sweet Potato Lentil Curry with Pickled Onion", "Sardine Mediterranean Pasta", "Prosciutto apple flatbread pizza", "Dill Cucumber Salmon", "Vegetable Couscous", "Talapia Tacos", "Roasted Mackerel", "Lentil Salsa Soup", "Pesto Tomato Penne", "Black Bean Soup", "Balsamic Pork Chops"]
-names2 = ["Spaghetti Carbonara", "Chicken Alfredo", "Beef Stroganoff", "Vegetable Stir Fry", "Chicken Tikka Masala", "Fish Tacos", "Pulled Pork Sandwiches", "Eggplant Parmesan", "Caesar Salad", "Shrimp Scampi", "Chicken Pot Pie", "Lamb Gyros", "Beef Wellington", "Vegetable Lasagna", "Pad Thai", "Butternut Squash Soup", "Grilled Cheese Sandwich", "Mushroom Risotto", "Chicken Quesadilla", "Turkey Club Sandwich", "Margherita Pizza", "Lobster Bisque", "Baked Ziti", "Beef Tacos", "Chicken Caesar Wrap", "Salmon Teriyaki", "Clam Chowder", "BBQ Ribs", "Falafel Wrap", "Stuffed Peppers", "Chicken Curry", "Ratatouille", "Greek Salad", "Cheeseburger", "Vegetable Curry", "Pulled Chicken", "Spinach Quiche", "Pasta Primavera", "Chicken Fajitas", "Tom Yum Soup", "Beef Burritos", "Chicken Wings", "Egg Salad Sandwich", "Beef Enchiladas", "Minestrone Soup", "Stuffed Mushrooms", "Lamb Kebabs", "Chicken Satay", "Gnocchi with Pesto", "Vegetarian Chili", "Steak Frites", "Chicken Parmesan", "Pork Schnitzel", "Grilled Shrimp", "Tuna Salad", "Vegetable Samosas", "Chicken Piccata", "French Onion Soup", "Lamb Shank", "Seafood Paella", "Spinach and Artichoke Dip", "BBQ Chicken Pizza", "Vegetarian Pizza", "Stuffed Cabbage Rolls", "Shrimp Fried Rice", "Shepherd’s Pie", "Chicken Alfredo Pasta", "Garlic Butter Shrimp", "Tomato Basil Soup", "Beef Bourguignon", "Chicken Noodle Soup", "Grilled Salmon", "Pork Tenderloin", "Chicken Cordon Bleu", "Eggplant Rollatini", "Vegetable Quesadilla", "Spaghetti Bolognese", "Tuna Casserole", "Vegetarian Tacos", "Beef and Broccoli", "Chicken Tenders", "Shrimp Tacos", "French Toast", "Beef Stew", "Chicken Shawarma", "Vegetable Soup", "Lamb Chops", "Cauliflower Steak", "Chicken Burritos", "Crab Cakes", "Tortellini Alfredo", "Vegetable Paella", "Baked Salmon", "Beef Kebabs", "Chicken Marsala", "Margarita Chicken", "Lentil Soup", "Beef Chili", "Vegetable Biryani", "Clam Linguine", "Chicken Chimichangas", "Pulled Pork Tacos", "Stuffed Shells", "Chicken Pad Thai", "Grilled Chicken Salad", "Tomato Soup", "Beef Meatballs", "Vegetable Spring Rolls", "Chicken Katsu", "Shrimp Pad Thai", "Stuffed Portobello Mushrooms", "Pulled Chicken Tacos", "Salmon Salad", "Spinach Lasagna", "Chicken and Dumplings", "Vegetable Stir-Fried Noodles"]
+names2 = ["Spaghetti Carbonara", "Chicken Alfredo", "Beef Stroganoff", "Vegetable Stir Fry", "Chicken Tikka Masala", "Fish Tacos", "Pulled Pork Sandwiches", "Eggplant Parmesan", "Caesar Salad", "Shrimp Scampi", "Chicken Pot Pie", "Lamb Gyros", "Beef Wellington", "Vegetable Lasagna", "Pad Thai", "Butternut Squash Soup", "Grilled Cheese Sandwich", "Mushroom Risotto", "Chicken Quesadilla", "Turkey Club Sandwich", "Margherita Pizza", "Lobster Bisque", "Baked Ziti", "Beef Tacos", "Chicken Caesar Wrap", "Salmon Teriyaki", "Clam Chowder", "BBQ Ribs", "Falafel Wrap", "Stuffed Peppers", "Chicken Curry", "Ratatouille", "Greek Salad", "Cheeseburger", "Vegetable Curry", "Pulled Chicken", "Spinach Quiche", "Pasta Primavera", "Chicken Fajitas", "Tom Yum Soup", "Beef Burritos", "Chicken Wings", "Egg Salad Sandwich", "Beef Enchiladas", "Minestrone Soup", "Stuffed Mushrooms", "Lamb Kebabs", "Chicken Satay", "Gnocchi with Pesto", "Vegetarian Chili", "Steak Frites", "Chicken Parmesan", "Pork Schnitzel", "Grilled Shrimp", "Tuna Salad", "Vegetable Samosas", "Chicken Piccata", "French Onion Soup", "Lamb Shank", "Seafood Paella", "Spinach and Artichoke Dip", "BBQ Chicken Pizza", "Vegetarian Pizza", "Stuffed Cabbage Rolls", "Shrimp Fried Rice", "Shepherd’s Pie", "Chicken Alfredo Pasta", "Garlic Butter Shrimp", "Tomato Basil Soup", "Beef Bourguignon", "Chicken Noodle Soup", "Grilled Salmon", "Pork Tenderloin", "Chicken Cordon Bleu", "Eggplant Rollatini", "Vegetable Quesadilla", "Spaghetti Bolognese", "Tuna Casserole", "Vegetarian Tacos", "Beef and Broccoli", "Chicken Tenders", "Shrimp Tacos", "French Toast", "Beef Stew", "Chicken Shawarma", "Vegetable Soup", "Lamb Chops", "Cauliflower Steak", "Chicken Burritos", "Crab Cakes", "Tortellini Alfredo", "Vegetable Paella", "Baked Salmon", "Beef Kebabs", "Chicken Marsala", "Margarita Chicken", "Lentil Soup", "Beef Chili", "Vegetable Biryani", "Clam Linguine", "Chicken Chimichangas", "Pulled Pork Tacos", "Stuffed Shells", "Chicken Pad Thai", "Grilled Chicken Salad", "Tomato Soup", "Beef Meatballs", "Vegetable Spring Rolls", "Chicken Katsu", "Shrimp Pad Thai", "Stuffed Portobello Mushrooms", "Pulled Chicken Tacos", "Salmon Salad", "Spinach Lasagna", "Chicken and Dumplings", "Vegetable Stir-Fried Noodles", "Thai Peanut Noodles", "Honey Garlic Salmon", "Black Bean Burgers", "Lemon Ricotta Cookies", "Seared Steak & Mashed Potatoes", "Moroccan Chickpea Stew", "Korean BBQ Chicken Bowls", "Spiced Apple Crisp", "Flank Steak Fajitas", "Rainbow Veggie Stir-Fry", "Double Chocolate Brownies", "Veggie Burgers", "Cheesy Chicken Enchiladas"]
 for i in range(37):
   names1.append(data.unique.dish())
 names3 = names1 + names2
@@ -230,7 +225,7 @@ for i in range(RECIPES):
   recipe_has_tip.append([])
 
 for i in range(RECIPES):
-  recipe_has_tip[i].append(random.sample(tips, random.randint(0, 3)))
+  recipe_has_tip[i] += random.sample(tips, random.randint(0, 3))
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -287,19 +282,20 @@ for i in range(RECIPES):
 name_of_thematic_unit = ["Thanksgiving desserts", "Christmas desserts", "Easter desserts", "Risotto dishes", "Summer salads", "Holiday appetizers", "Breakfast smoothies", "Pasta salads", "Picnic sandwiches", "Grilled vegetable dishes", "Baked goods", "Soup varieties", "Smoothie bowls", "Healthy snack options", "One-pot meals", "Casserole dishes", "Brunch items", "Quick stir-fries", "Frozen desserts", "Energy bites", "Sheet pan dinners", "Fruit salads", "Cold noodle dishes", "Barbecue sides", "Chilled soups", "Grain bowls", "Savory tarts", "Hot pot dishes", "Oven-roasted vegetables", "Finger foods"]
 
 # DESCRIPTION
-descriptions = ["Delicious desserts traditionally enjoyed during the Easter holiday.", "Creamy and flavorful rice dishes made with a variety of ingredients.", "Refreshing salads that are perfect for the hot summer months.", "Appetizers that are often served during holiday gatherings and parties.", "Nutritious and tasty smoothies perfect for a quick and healthy breakfast.", "Cold salads made with pasta and a variety of other ingredients.", "Sandwiches that are easy to pack and enjoy during a picnic.", "Vegetable dishes that are cooked on the grill for a delicious smoky flavor.", "Various baked treats such as cakes, cookies, and bread.", "Different types of soups, perfect for warming up on a chilly day.", "Thicker smoothies served in a bowl and topped with various fruits and nuts.", "Nutritious snacks that are both delicious and good for you.", "Meals that are cooked in a single pot for easy cleanup and convenience.", "Baked dishes made with a variety of ingredients, often topped with cheese or breadcrumbs.", "Dishes typically enjoyed during a late-morning meal combining breakfast and lunch.", "Fast and flavorful dishes made by quickly frying ingredients in a hot pan.", "Cold and sweet treats perfect for a hot day.", "Small, nutritious snacks packed with energy-boosting ingredients.", "Complete meals cooked on a single sheet pan in the oven.", "Colorful salads made with a variety of fresh fruits.", "Chilled noodle dishes often served with a flavorful sauce.", "Side dishes that complement grilled meats and vegetables.", "Soups that are served cold, ideal for hot summer days.", "Various dips and spreads served with bread, crackers, or vegetables.", "Nourishing bowls made with grains, vegetables, and protein.", "Delicious tarts filled with savory ingredients like cheese, vegetables, or meat.", "Comforting dishes cooked at the dining table in a simmering pot of broth.", "Vegetables roasted in the oven for a delicious caramelized flavor.", "Small, easy-to-eat foods that are perfect for parties and gatherings.", "Refreshing juice blends made from various fruits and vegetables."]
+description_of_thematic_unit = ["Delicious desserts traditionally enjoyed during the Easter holiday.", "Creamy and flavorful rice dishes made with a variety of ingredients.", "Refreshing salads that are perfect for the hot summer months.", "Appetizers that are often served during holiday gatherings and parties.", "Nutritious and tasty smoothies perfect for a quick and healthy breakfast.", "Cold salads made with pasta and a variety of other ingredients.", "Sandwiches that are easy to pack and enjoy during a picnic.", "Vegetable dishes that are cooked on the grill for a delicious smoky flavor.", "Various baked treats such as cakes, cookies, and bread.", "Different types of soups, perfect for warming up on a chilly day.", "Thicker smoothies served in a bowl and topped with various fruits and nuts.", "Nutritious snacks that are both delicious and good for you.", "Meals that are cooked in a single pot for easy cleanup and convenience.", "Baked dishes made with a variety of ingredients, often topped with cheese or breadcrumbs.", "Dishes typically enjoyed during a late-morning meal combining breakfast and lunch.", "Fast and flavorful dishes made by quickly frying ingredients in a hot pan.", "Cold and sweet treats perfect for a hot day.", "Small, nutritious snacks packed with energy-boosting ingredients.", "Complete meals cooked on a single sheet pan in the oven.", "Colorful salads made with a variety of fresh fruits.", "Chilled noodle dishes often served with a flavorful sauce.", "Side dishes that complement grilled meats and vegetables.", "Soups that are served cold, ideal for hot summer days.", "Various dips and spreads served with bread, crackers, or vegetables.", "Nourishing bowls made with grains, vegetables, and protein.", "Delicious tarts filled with savory ingredients like cheese, vegetables, or meat.", "Comforting dishes cooked at the dining table in a simmering pot of broth.", "Vegetables roasted in the oven for a delicious caramelized flavor.", "Small, easy-to-eat foods that are perfect for parties and gatherings.", "Refreshing juice blends made from various fruits and vegetables."]
 # -----------------------------------------------------------------------------------------------------
 
 
 
 
 #--------------------------------------- BELONGS TO THEMATIC UNIT -------------------------------------
+# RECIPE i BELONGS TO LIST OF THEMATIC UNITS
 recipe_belongs_to_thematic_unit = []
 for i in range(RECIPES):
   recipe_belongs_to_thematic_unit.append([])
 
 for i in range(RECIPES):
-  recipe_belongs_to_thematic_unit[i].append(random.sample(name_of_thematic_unit, random.randint(1, 7)))
+  recipe_belongs_to_thematic_unit[i] += random.sample(name_of_thematic_unit, random.randint(1, 7))
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -314,7 +310,7 @@ for _ in range(COOKS):
 # NAME, SURNAME
 name_of_cook = []
 surname_of_cook = []
-for _ in (COOKS):
+for _ in range(COOKS):
   full_name = (data.name()).split()
   name_of_cook.append(full_name[0])
   surname_of_cook.append(full_name[1])
@@ -331,7 +327,7 @@ for i in range(COOKS):
 date_of_birth = []
 years_of_experience = []
 date1 = datetime(1960, 1, 1)
-date2 = datetime(2006, 12, 12)
+date2 = datetime(2005, 12, 12)
 for _ in range(COOKS):
   b = data.date_between_dates(date1, date2)
   a = 2024 - b.year
@@ -349,45 +345,174 @@ for _ in range(COOKS):
 
 
 #---------------------------------- COOK BELONGS TO NATIONAL CUISINE ----------------------------------
-# COOK (with id) i BELONGS TO LIST OF NATIONAL CUISINES
+# COOK (with id - 1) i BELONGS TO LIST OF NATIONAL CUISINES
 cooks_belongs_to_national_cuisine = []
 c = list(existing_cuisines)
 for _ in range(COOKS):
   cooks_belongs_to_national_cuisine.append([])
 
 for cuisine in existing_cuisines:
-  cooks_to_assign = random.sample(cook_id, 3)
+  cooks_to_assign = random.sample(cook_id, random.randint(3, 6))
   for cook in cooks_to_assign:
-    cooks_belongs_to_national_cuisine[cook].append(cuisine)
+    cooks_belongs_to_national_cuisine[cook - 1].append(cuisine)
 
 for cook in cooks_belongs_to_national_cuisine:
   if cook == []:
-    rng = random.randint(1, 5)
+    rng = random.randint(1, 3)
     for i in range(rng):
       cook.append(random.choice(c))
-
-# for i in range(COOKS):
-#   rng = random.randint(1, 5)
-#   for j in range(rng):
-#     cook_belongs_to_national_cuisine[i].append(random.choice(c))
-    
 # -----------------------------------------------------------------------------------------------------
 
-db = mysql.connector.connect(
-  host = "localhost",
-  user = "root",
-  passwd = "MySQLmasterchef24ecentu@"
-)
 
-cursor = db.cursor()
-cursor.execute("DROP DATABASE IF EXISTS `cooking`")
-cursor.execute("CREATE DATABASE `cooking`")
-cursor.execute("USE `cooking`")
+#------------------------------------------ FILE GENERATION -------------------------------------------
 
-# cursor.execute("SHOW DATABASES")
+# food_group
+data_insertions = "INSERT INTO food_group\nVALUES"
+for i in range(FOOD_GROUPS):  
+  data_insertions += f'\n    ("{name_of_food_group[i]}", "{description_of_food_group[i]}", "{recipe_description[i]}")'
+  if i < FOOD_GROUPS - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
 
-# for database in cursor:
-#   print(database)
+# ingredients
+data_insertions += "INSERT INTO ingredients\nVALUES"
+for i in range(INGREDIENTS):  
+  data_insertions += f'\n    ("{name_of_ingredient[i]}", {calories_per_100gr[i]}, "{ingredient_of_food_group[i]}")'
+  if i < INGREDIENTS - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
+
+# recipe
+data_insertions += "INSERT INTO recipe\nVALUES"
+for i in range(RECIPES):  
+  data_insertions += f'\n    ("{rec_name[i]}", "{rec_type[i]}", {level_of_diff[i]}, "{short_descr[i]}", {prep_time[i]}, {cooking_time[i]}, {portions[i]}, "{name_of_main_ingredient[i]}", {grams_of_fat_per_portion[i]}, {grams_of_carbohydrates_per_portion[i]}, {grams_of_proteins_per_portion[i]}, NULL ,"{national_cuisine[i]}")'
+  if i < RECIPES - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
+
+# needs_ingredient
+data_insertions += "INSERT INTO needs_ingredient\nVALUES"
+for i in range(RECIPES):
+  rni = len(recipe_needs_ingredient[i])
+  for j in range(rni):
+    data_insertions += f'\n    ("{recipe_needs_ingredient[i][j][0]}", "{rec_name[i]}", "{recipe_needs_ingredient[i][j][1]}")'
+    if i < RECIPES - 1 or j < rni - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# type_of_meal
+data_insertions += "INSERT INTO type_of_meal\nVALUES"
+for i in range(RECIPES):
+  tom = len(recipe_has_meal_type[i])
+  for j in range(tom):
+    data_insertions += f'\n    ("{recipe_has_meal_type[i][j]}", "{rec_name[i]}")'
+    if i < RECIPES - 1 or j < tom - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# tags
+data_insertions += "INSERT INTO tags\nVALUES"
+for i in range(RECIPES):
+  rhtg = len(recipe_has_tag[i])
+  for j in range(rhtg):
+    data_insertions += f'\n    ("{recipe_has_tag[i][j]}", "{rec_name[i]}")'
+    if i < RECIPES - 1 or j < rhtg - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# tips
+data_insertions += "INSERT INTO tips\nVALUES"
+for i in range(RECIPES):
+  rhtp = len(recipe_has_tip[i])
+  for j in range(rhtp):
+    data_insertions += f'\n    ("{recipe_has_tip[i][j]}", "{rec_name[i]}")'
+    if i < RECIPES - 1 or j < rhtp - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# equipment
+data_insertions += "INSERT INTO equipment\nVALUES"
+for i in range(len(equipment_name)):  
+  data_insertions += f'\n    ("{equipment_name[i]}", "{instruction_manual[i]}")'
+  if i < len(equipment_name) - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
+
+# uses_equipment
+data_insertions += "INSERT INTO uses_equipment\nVALUES"
+for i in range(RECIPES):
+  rue = len(recipe_uses_equipment[i])
+  for j in range(rue):
+    data_insertions += f'\n    ("{rec_name[i]}", "{recipe_uses_equipment[i][j]}")'
+    if i < RECIPES - 1 or j < rue - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# step
+data_insertions += "INSERT INTO step\nVALUES"
+for i in range(RECIPES):
+  rfs = len(recipe_follows_steps[i])
+  for j in range(rfs):
+    data_insertions += f'\n    ("{recipe_follows_steps[i][j][1]}", {recipe_follows_steps[i][j][0]}, "{rec_name[i]}")'
+    if i < RECIPES - 1 or j < rfs - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# thematic_unit
+data_insertions += "INSERT INTO thematic_unit\nVALUES"
+for i in range(len(name_of_thematic_unit)):  
+  data_insertions += f'\n    ("{name_of_thematic_unit[i]}", "{description_of_thematic_unit[i]}")'
+  if i < len(name_of_thematic_unit) - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
+
+# belongs_to_thematic_unit
+data_insertions += "INSERT INTO belongs_to_thematic_unit\nVALUES"
+for i in range(RECIPES):
+  rbttu = len(recipe_belongs_to_thematic_unit[i])
+  for j in range(rbttu):
+    data_insertions += f'\n    ("{rec_name[i]}", "{recipe_belongs_to_thematic_unit[i][j]}")'
+    if i < RECIPES - 1 or j < rbttu - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+# cooks
+data_insertions += "INSERT INTO cooks\nVALUES"
+for i in range(COOKS):  
+  data_insertions += f'\n    ({cook_id[i]}, "{name_of_cook[i]}", "{surname_of_cook[i]}", "{phone_number[i]}", {date_of_birth[i]}, NULL, {years_of_experience[i]}, "{cook_category[i]}")'
+  if i < COOKS - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
+
+# cook_belongs_to_national_cuisine
+data_insertions += "INSERT INTO cook_belongs_to_national_cuisine\nVALUES"
+for i in range(COOKS):
+  cbtnc = len(cooks_belongs_to_national_cuisine[i])
+  for j in range(cbtnc):
+    data_insertions += f'\n    ({cook_id[i]}, "{cooks_belongs_to_national_cuisine[i][j]}")'
+    if i < COOKS - 1 or j < cbtnc - 1:
+      data_insertions += ','
+    else:
+      data_insertions += ';\n\n\n'
+
+filename = 'INSERTIONS.sql'
+
+with open(filename, 'w') as script:
+  script.write(data_insertions)
+# -----------------------------------------------------------------------------------------------------
 
 
 
