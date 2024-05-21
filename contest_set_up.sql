@@ -1,4 +1,6 @@
-SET SQL_SAFE_UPDATES = 0; /*useful so i can delete anything from a table*/ 
+/*useful so i can delete anything from a table*/ 
+SET SQL_SAFE_UPDATES = 0; 
+
 
 CREATE TABLE cooks_recipes_per_episode_(
 current_year INT(11) ,
