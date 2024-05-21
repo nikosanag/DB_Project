@@ -1,10 +1,5 @@
 SET SQL_SAFE_UPDATES = 0; /*useful so i can delete anything from a table*/ 
 
-Create table national_cuisine(
-name_national varchar(50),
-primary key (name_national)
-);
-
 CREATE TABLE cooks_recipes_per_episode_(
 current_year INT(11) ,
 episode_number INT(11) ,
@@ -44,6 +39,11 @@ CREATE TABLE available_recipes(
 	PRIMARY KEY(rec_name)
 );
 
+CREATE TABLE available_national_cuisines(
+national_cuisine VARCHAR(50),
+PRIMARY KEY (national_cuisine)
+);
+
 DELIMITER // 
 CREATE PROCEDURE updating_security_check_cooks(in cooker_id INT) 
 BEGIN    
@@ -58,13 +58,15 @@ BEGIN
 	END IF;
  
 END;
-//
+// 
 DELIMITER ; 
 
+
+
 DELIMITER //
-CREATE PROCEDURE updating_security_check_recipes(in rec_nam VARCHAR)
+CREATE PROCEDURE updating_security_check_recipes(in rec_nam VARCHAR(50))
 BEGIN
-		IF (SELECT COUNT(*) FROM available_recipes WHERE rec_nam = rec_name) =0 /*isnt in table security_purposes recipes*/
+		IF (SELECT COUNT(*) FROM available_recipes WHERE rec_nam = rec_name) = 0 /*isnt in table security_purposes recipes*/
         THEN INSERT INTO security_purposes_recipes(rec_name,triggering_number) VALUE (rec_nam,1); 
         
         ELSE
@@ -73,14 +75,32 @@ BEGIN
             WHERE rec_nam = rec_name;
             END IF;
 END; 
-/
-DELIMITER // /*SUPER IMPORTANT for inserting recipes and cooks...open on your own risk...I warned you!*/
+//
+DELIMITER ; 
+
+DELIMITER // 
+CREATE PROCEDURE updating_security_check_national_cuisines(in name_of_national VARCHAR(50))
+BEGIN
+		IF (SELECT COUNT(*) FROM available_recipes WHERE national_cuisine = name_of_national) = 0 
+        THEN INSERT INTO security_purposes_national_cuisine(name_national,triggering_number) VALUE (name_of_national,1);
+        
+        ELSE 
+			UPDATE security_purposes_national_cuisine
+            SET triggering_number = triggering_number + 1
+            WHERE name_national = name_of_national;
+		END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER // 
+/*SUPER IMPORTANT for inserting recipes and cooks...open on your own risk...I warned you!*/
 CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode_
 FOR EACH ROW
 BEGIN
 
 	DECLARE id INT;
-	DECLARE rec_name VARCHAR(50); 
+	DECLARE rname VARCHAR(50); 
 
 /*αναζητα καταλληλο cook.Ο καταλληλος ειναι ενας που δεν ειναι ακομα στο security_purposes_cooks ή αν ειναι δεν ειναι το triggering number = 3...και ενας που ανηκει σε αυτη την εθνικη κουζινα*/
 	SET id = (SELECT cook_id FROM available_cooks WHERE (((SELECT trigerring_number FROM security_purposes_cooks where cook_id = id) < 3) OR ((SELECT 1 FROM security_purposes_cooks WHERE cook_id = id) != 1)) AND (SELECT 1 FROM cooks_belongs_to_national_cuisine WHERE (cook_id = id AND type_of_national_cuisine_that_belongs_to = NEW.national_cuisine)) = 1);
@@ -100,13 +120,23 @@ BEGIN
     WHERE rec_name = rname; 
     
  /*updates the table security_purposes*/ 
-	CALL updating_security_check_recipes(rname);
+    CALL updating_security_check_recipes(rname);
+    
+    
+    /*διαγραφει το national cuisine απο το available_national_cuisine μεχρι το τελος του τωρινου επεισοδιου*/ 
+    DELETE FROM available_national_cuisine WHERE national_cuisine = NEW.national_cuisine; 
+    
+    /*updates the table security_purposes_national_cuisine*/
+	CALL update_security_check_national_cuisines(NEW.national_cuisine);
+    
     
 END;
 //
 DELIMITER ; 
 
-/*initializes the procedure of a single episode.*/
+
+
+/*initializes the procedure of making a single episode.*/
 DELIMITER // 
 CREATE PROCEDURE creation_of_episode(IN requested_year INT, requested_episode INT)
 BEGIN
@@ -116,10 +146,10 @@ BEGIN
 
     
 	INSERT INTO cooks_recipes_per_episode_ (current_year,episode_number,national_cuisine)
-	SELECT requested_year,requested_episode,name_national
-	FROM national_cuisine
+	SELECT requested_year,requested_episode,national_cuisine
+	FROM available_national_cuisines
 	ORDER BY RAND()	
-	LIMIT 10; 
+	LIMIT 10; /*για καθε national cuisine που μπανει στον πινακα cooks_recipes_per_episode μεσα απο ενα trigger για αυτο το πινακα υλοποιειται η επιλογη μαγειρα και συνταγης!*/
     
 	INSERT INTO judges (current_year,episode_number,cook_id)
 	SELECT requested_year,requested_episode,cook_id
@@ -127,39 +157,36 @@ BEGIN
 	ORDER BY RAND()	
 	LIMIT 3;    
 	
-    /*DELETE FROM available_cooks;
-    DELETE FROM available_recipes;*/
+    
     DELETE FROM security_purposes_cooks WHERE cook_id = (SELECT cook_id FROM available_cooks);
     DELETE FROM available_cooks;
     DELETE FROM security_purposes_recipes WHERE rec_name = (SELECT rec_name FROM available_recipes);
     DELETE FROM available_recipes; 
 END;
 //
-DELIMITER;
+DELIMITER ;
 
 
 DELIMITER // 
 CREATE PROCEDURE build_the_contest(IN starting_year INT,end_year INT) 
 BEGIN
-DECLARE count INT; 
-DECLARE count_inside INT; 
-SET count = starting_year ; 
+DECLARE counta INT(11); 
+DECLARE count_inside INT(11); 
+SET counta = starting_year ; 
 
-
-INSERT INTO national_cuisine 
-SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine;
-
-
-while (count<end_year+1) DO
+while (counta < end_year+1) DO
 	BEGIN
     SET count_inside = 0;    
     WHILE (count_inside < 10) DO
 		BEGIN
-		CALL creation_of_episode(count,count_inside) ;
+        INSERT INTO available_national_cuisines
+		SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine WHERE (((SELECT triggering_number FROM security_purposes_national_cuisine WHERE name_national = type_of_national_cuisine_that_belongs_to) < 3) OR ((SELECT 1 FROM security_purposes_national_cuisine WHERE name_national = type_of_national_cuisine_that_belongs_to)!=1));
+		/*επιλεγει τους national cuisines που δεν εχουνε παρουσιαστει τρεις συνεχομενες φορε μοναχα*/
+		CALL creation_of_episode(counta,count_inside) ;
         SET count_inside = count_inside+1 ; 
         END;
         END WHILE; 
-	SET count = count +1 ; 
+	SET counta = counta +1 ; 
 	END; 
     END WHILE;
 
@@ -168,7 +195,7 @@ INSERT INTO cooks_recipes_per_episode (current_year,episode_number,rec_name,cook
 SELECT current_year , episode_number , rec_name , cook_id 
 FROM cooks_recipes_per_episode_ ;
 DELETE FROM cooks_recipes_per_episode_;
-DELETE FROM national_cuisine; 
+DELETE FROM available_national_cuisines; 
 DELETE FROM security_purposes_cooks; 
 DELETE FROM security_purposes_recipes;
 DELETE FROM available_recipes;
@@ -180,5 +207,5 @@ DELIMITER ;
 
 
 
-CALL build_the_contest(2019,2024);
+CALL build_the_contest(0,2024);
 
