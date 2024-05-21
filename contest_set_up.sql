@@ -151,5 +151,5 @@ END;
 DELIMITER ; 
 
 
-CALL build_the_contest(2000,2024);
+CALL build_the_contest(2019,2024);
 

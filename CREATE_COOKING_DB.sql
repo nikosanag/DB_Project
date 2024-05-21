@@ -227,7 +227,7 @@ END;
 DELIMITER ;
 
 
-
+/*
 drop trigger ensure_main
 DELIMITER // 
 CREATE TRIGGER ensure_main AFTER INSERT ON recipe 
@@ -240,7 +240,7 @@ BEGIN
 END;
 //
 DELIMITER ; 
-
+*/
 
 
  
