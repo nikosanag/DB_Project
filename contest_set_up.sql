@@ -92,9 +92,8 @@ BEGIN
 END;
 //
 DELIMITER ;
-
-DELIMITER // 
 /*SUPER IMPORTANT for inserting recipes and cooks...open on your own risk...I warned you!*/
+DELIMITER // 
 CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode_
 FOR EACH ROW
 BEGIN
@@ -207,5 +206,17 @@ DELIMITER ;
 
 
 
-CALL build_the_contest(0,2024);
-
+CALL build_the_contest(2019,2024);
+DROP TRIGGER CooksAndRecipes_inserts_in_result_here; 
+DROP TABLE cooks_recipes_per_episode_;
+DROP TABLE  security_purposes_cooks;
+DROP TABLE security_purposes_recipes;
+DROP TABLE security_purposes_national_cuisine;
+DROP TABLE available_national_cuisines;
+DROP TABLE available_recipes;
+DROP TABLE available_cooks;
+DROP PROCEDURE build_the_contest;
+DROP PROCEDURE creation_of_episode; 
+DROP PROCEDURE updating_security_check_cooks;
+DROP PROCEDURE updating_security_check_recipes;
+DROP PROCEDURE updating_security_check_national_cuisines;
