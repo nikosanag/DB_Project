@@ -30,7 +30,7 @@ name_of_food_group = [
 # GROUP DESCRIPTION
 description_of_food_group = []
 for i in range (FOOD_GROUPS):
-  description_of_food_group.append(data.unique.sentence())
+  description_of_food_group.append(data.unique.sentence()[:50])
 
 # RECIPE DESCRIPTION
 recipe_description = [
@@ -101,9 +101,9 @@ for i in range(RECIPES):
 # DESCRIPTION
 short_descr = []
 for i in range(RECIPES // 2):
-  short_descr.append(data.dish_description())
+  short_descr.append(data.dish_description()[:50])
 for i in range(RECIPES - (RECIPES // 2)):
-  short_descr.append(data.sentence())
+  short_descr.append(data.sentence()[:50])
 
 # PREPARATION TIME 
 prep_time = []
