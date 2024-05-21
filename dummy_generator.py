@@ -160,26 +160,24 @@ for i in range(RECIPES):
 
 for i in range(RECIPES):  #inserting main ingredient
   main = name_of_main_ingredient[i]
-  dice = random.randint(1, 2)
-  if dice == 1:
-    m = data.measurement()
-  else:
-    m = data.metric_measurement()
-  quantity = data.measurement_size() + ' ' + m
+  quantity = random.randint(30, 400)
   recipe_needs_ingredient[i].append((main, quantity))
+
+
+def ingExists(num_of_recipe , ingr):
+  for pair in recipe_needs_ingredient[num_of_recipe]:
+    if (pair[0] == ingr):
+      return True
+  return False
+
 
 for i in range(RECIPES):
   rng = random.randint(5, 16)
   for j in range(rng):
     ing = random.choice(name_of_ingredient)
-    if ing in recipe_needs_ingredient[i]:
+    if ingExists(i, ing):
       continue
-    dice = random.randint(1, 2)
-    if dice == 1:
-      m = data.measurement()
-    else:
-      m = data.metric_measurement()
-    quantity = data.measurement_size() + ' ' + m
+    quantity = random.randint(30, 400)
     append_value = (ing, quantity)
     recipe_needs_ingredient[i].append(append_value)
 # -----------------------------------------------------------------------------------------------------
@@ -195,7 +193,7 @@ for i in range(RECIPES):
   recipe_has_meal_type.append([])
 
 for i in range(RECIPES):
-  recipe_has_meal_type[i].append(random.sample(type_of_meal, random.randint(1, len(type_of_meal))))
+  recipe_has_meal_type[i] += random.sample(type_of_meal, random.randint(1, len(type_of_meal)))
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -210,7 +208,7 @@ for i in range(RECIPES):
   recipe_has_tag.append([])
 
 for i in range(RECIPES):
-  recipe_has_tag[i].append(random.sample(tags, random.randint(1, len(tags))))
+  recipe_has_tag[i] += random.sample(tags, random.randint(1, len(tags)))
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -251,8 +249,8 @@ recipe_uses_equipment = []
 for i in range(RECIPES):
   recipe_uses_equipment.append([])
 
-for i in range(RECIPES):
-  recipe_uses_equipment[i].append(random.sample(equipment_name, random.randint(4, 10)))
+for i in range(RECIPES): 
+  recipe_uses_equipment[i] += random.sample(equipment_name, random.randint(4, 10))
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -398,7 +396,7 @@ data_insertions += "INSERT INTO needs_ingredient\nVALUES"
 for i in range(RECIPES):
   rni = len(recipe_needs_ingredient[i])
   for j in range(rni):
-    data_insertions += f'\n    ("{recipe_needs_ingredient[i][j][0]}", "{rec_name[i]}", "{recipe_needs_ingredient[i][j][1]}")'
+    data_insertions += f'\n    ("{recipe_needs_ingredient[i][j][0]}", "{rec_name[i]}", {recipe_needs_ingredient[i][j][1]})'
     if i < RECIPES - 1 or j < rni - 1:
       data_insertions += ','
     else:
@@ -431,7 +429,7 @@ data_insertions += "INSERT INTO tips\nVALUES"
 for i in range(RECIPES):
   rhtp = len(recipe_has_tip[i])
   for j in range(rhtp):
-    data_insertions += f'\n    ("{recipe_has_tip[i][j]}", "{rec_name[i]}")'
+    data_insertions += f'\n    ("{rec_name[i]}", "{recipe_has_tip[i][j]}")'
     if i < RECIPES - 1 or j < rhtp - 1:
       data_insertions += ','
     else:
@@ -491,14 +489,14 @@ for i in range(RECIPES):
 # cooks
 data_insertions += "INSERT INTO cooks\nVALUES"
 for i in range(COOKS):  
-  data_insertions += f'\n    ({cook_id[i]}, "{name_of_cook[i]}", "{surname_of_cook[i]}", "{phone_number[i]}", {date_of_birth[i]}, NULL, {years_of_experience[i]}, "{cook_category[i]}")'
+  data_insertions += f'\n    ({cook_id[i]}, "{name_of_cook[i]}", "{surname_of_cook[i]}", "{phone_number[i]}", \'{date_of_birth[i]}\', NULL, {years_of_experience[i]}, "{cook_category[i]}")'
   if i < COOKS - 1:
     data_insertions += ','
   else:
     data_insertions += ';\n\n\n'
 
 # cook_belongs_to_national_cuisine
-data_insertions += "INSERT INTO cook_belongs_to_national_cuisine\nVALUES"
+data_insertions += "INSERT INTO cooks_belongs_to_national_cuisine\nVALUES"
 for i in range(COOKS):
   cbtnc = len(cooks_belongs_to_national_cuisine[i])
   for j in range(cbtnc):
