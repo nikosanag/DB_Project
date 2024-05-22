@@ -6,6 +6,8 @@ CREATE TABLE food_group(
 name_of_food_group VARCHAR(50),
 description_of_food_group VARCHAR(50),
 recipe_description VARCHAR(50),
+image_of_food_group VARCHAR(50),
+image_of_food_group_desc VARCHAR(100),
 PRIMARY KEY (name_of_food_group)
 );
 
@@ -13,6 +15,8 @@ CREATE TABLE ingredients(
 name_of_ingredient VARCHAR(50),
 calories_per_100gr INT(11),
 name_of_food_group VARCHAR(50) NOT NULL,
+image_of_ingredient VARCHAR(50),
+image_of_ingredient_desc VARCHAR(100),
 PRIMARY KEY (name_of_ingredient),
 CONSTRAINT f_key_ingredients_food_group FOREIGN KEY (name_of_food_group) REFERENCES food_group (name_of_food_group)
 );
@@ -30,7 +34,9 @@ grams_of_fat_per_portion INT(11) CHECK(grams_of_fat_per_portion>0),
 grams_of_carbohydrates_per_portion INT(11) CHECK(grams_of_carbohydrates_per_portion>0),
 grams_of_proteins_per_portion INT(11) CHECK(grams_of_proteins_per_portion>0),
 calories_per_portion INT(11),
-national_cuisine VARCHAR(50), 
+national_cuisine VARCHAR(50),
+image_of_recipe VARCHAR(50),
+image_of_recipe_desc VARCHAR(100), 
 PRIMARY KEY (rec_name),
 CONSTRAINT f_key_recipe_ingredients FOREIGN KEY (name_of_main_ingredient) REFERENCES ingredients (name_of_ingredient)
 );
@@ -71,6 +77,8 @@ CONSTRAINT f_key_tips_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 CREATE TABLE equipment(
 equipment_name VARCHAR(50),
 instruction_manual VARCHAR(200),
+image_of_equipment VARCHAR(50),
+image_of_equipment_desc VARCHAR(100),
 PRIMARY KEY(equipment_name)
 );
 
@@ -93,6 +101,8 @@ CONSTRAINT f_key_step_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name)
 CREATE TABLE thematic_unit(
 name_of_thematic_unit VARCHAR(50),
 description_of_thematic_unit VARCHAR(100),
+image_of_thematic_unit VARCHAR(50),
+image_of_thematic_unit_desc VARCHAR(100),
 PRIMARY KEY (name_of_thematic_unit)
 );
 
@@ -113,6 +123,8 @@ date_of_birth date,
 age INT(11),
 years_of_experience INT(11) CHECK(years_of_experience>0),
 cook_category VARCHAR(50) CHECK(cook_category IN ('C Cook', 'B Cook', 'A Cook', 'Chef', "Chef's Assistant")),
+image_of_cook VARCHAR(50),
+image_of_cook_desc VARCHAR(100),
 PRIMARY KEY (cook_id)
 );
 
