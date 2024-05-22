@@ -95,52 +95,7 @@ DELIMITER ;
 
 
 /*SUPER IMPORTANT for inserting recipes and cooks...open on your own risk...I warned you!*/
-DELIMITER // 
-CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode_
-FOR EACH ROW
-BEGIN
-	DECLARE id INT(11);
-	DECLARE rname VARCHAR(50); 
 
-/*αναζητα καταλληλο cook.Ο καταλληλος ειναι ενας που δεν ειναι ακομα στο security_purposes_cooks ή αν ειναι δεν ειναι το triggering number = 3...και ενας που ανηκει σε αυτη την εθνικη κουζινα*/
-	SET id = (SELECT cook_id FROM available_cooks WHERE (((SELECT trigerring_number FROM security_purposes_cooks where available_cooks.cook_id = security_purposes_cooks.cook_id) < 3) 
-    OR ((SELECT 1 FROM security_purposes_cooks WHERE security_purposes_cooks.cook_id = available_cooks.cook_id) != 1)) 
-    AND (SELECT 1 FROM cooks_belongs_to_national_cuisine 
-    WHERE (cooks_belongs_to_national_cuisine.cook_id = available_cooks.cook_id AND type_of_national_cuisine_that_belongs_to = NEW.national_cuisine)) = 1);
-	
-    SET NEW.cook_id = id; 
-
-	DELETE FROM available_cooks  /*τον καταργει απο το πινακα υποψηφιων ,αφου θα χει μπει, για αυτο το επεισοδιο*/
-	WHERE cook_id = id; 
-/*updates the table security_purposes*/ 
-  CALL updating_security_check_cooks(id); 
-    
- /*αναζητα καταλληλο recipe ,το οποιο πρεπει να αντιστοιχιζεται στην εθνικη κουζινα και δεν εχει μπει σε τρια συνεχομενα επεισοδια ή δεν εχει μπει καν στα τρια τελευταια επεισοδια και δεν βρισκονται στο security_purposes_recipes*/
-	SET rname = (SELECT rec_name FROM available_recipes 
-    WHERE (NEW.national_cuisine = national_cuisine) 
-    AND ((SELECT triggering_number FROM security_purposes_recipes WHERE available_recipes.rec_name = security_purposes_recipes.rec_name)<3 
-    OR (SELECT 1 FROM security_purposes_recipes where available_recipes.rec_name = security_purposes_recipes.rec_name)!=1));
-	
-    SET NEW.rec_name = rname; 
- /*διαγραφει αυτο το recipe για αυτο το επεισοδιο*/
-	DELETE FROM available_recipes
-    WHERE rec_name = rname; 
-    
- /*updates the table security_purposes*/ 
-    CALL updating_security_check_recipes(rname);
-    
-    
-    /*διαγραφει το national cuisine απο το available_national_cuisine μεχρι το τελος του τωρινου επεισοδιου*/ 
-    DELETE FROM available_national_cuisine 
-    WHERE (national_cuisine = NEW.national_cuisine); 
-    
-    /*updates the table security_purposes_national_cuisine*/
-	CALL update_security_check_national_cuisines(NEW.national_cuisine);
-    
-    
-END;
-//
-DELIMITER ; 
 
 
 
@@ -182,8 +137,16 @@ DELIMITER ;
 DELIMITER // 
 CREATE PROCEDURE build_the_contest(IN starting_year INT(11),end_year INT(11)) 
 BEGIN
+
+
 DECLARE counta INT(11); 
 DECLARE count_inside INT(11); 
+DELETE FROM judges;
+DELETE FROM evaluation;
+DELETE FROM security_purposes_cooks;
+DELETE FROM security_purposes_national_cuisine ; 
+DELETE FROM security_purposes_recipes;
+DELETE FROM episodes_per_year; 
 SET counta = starting_year ; 
 
 WHILE (counta < end_year+1) DO
@@ -192,14 +155,15 @@ WHILE (counta < end_year+1) DO
     WHILE (count_inside <= 10) DO
 		BEGIN
         INSERT INTO episodes_per_year(current_year,episode_number) VALUE (counta,count_inside);
+        
+        
         INSERT INTO available_national_cuisines
 		SELECT DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
         WHERE 
         (((SELECT triggering_number FROM security_purposes_national_cuisine
         WHERE name_national=type_of_national_cuisine_that_belongs_to) < 3) 
-        OR ((SELECT 1 FROM security_purposes_national_cuisine 
-        WHERE name_national = type_of_national_cuisine_that_belongs_to)!=1));
-		
+        OR ((type_of_national_cuisine_that_belongs_to NOT IN (SELECT name_national FROM security_purposes_national_cuisine 
+        ))));
         
         /*επιλεγει τους national cuisines που δεν εχουνε παρουσιαστει τρεις συνεχομενες φορε μοναχα*/
 		CALL creation_of_episode(counta,count_inside) ;
@@ -230,10 +194,59 @@ END;
 //
 DELIMITER ;
 
+DELIMITER // 
+CREATE TRIGGER CooksAndRecipes_inserts_in_result_here BEFORE INSERT ON cooks_recipes_per_episode_
+FOR EACH ROW
+BEGIN
+	DECLARE id INT(11);
+	DECLARE rname VARCHAR(50); 
+    
+    
+/*αναζητα καταλληλο cook.Ο καταλληλος ειναι ενας που δεν ειναι ακομα στο security_purposes_cooks ή αν ειναι δεν ειναι το triggering number = 3...και ενας που ανηκει σε αυτη την εθνικη κουζινα*/
+	SET id = (SELECT cook_id FROM available_cooks WHERE (((SELECT triggering_number FROM security_purposes_cooks where available_cooks.cook_id = security_purposes_cooks.cook_id) < 3) 
+    OR (available_cooks.cook_id NOT IN (SELECT cook_id FROM security_purposes_cooks))) 
+    AND (available_cooks.cook_id IN (SELECT cook_id FROM cooks_belongs_to_national_cuisine 
+    WHERE (type_of_national_cuisine_that_belongs_to = NEW.national_cuisine)))
+    LIMIT 1);
+	
+    SET NEW.cook_id = id; 
+
+	DELETE FROM available_cooks  /*τον καταργει απο το πινακα υποψηφιων ,αφου θα χει μπει, για αυτο το επεισοδιο*/
+	WHERE cook_id = id; 
+/*updates the table security_purposes*/ 
+  CALL updating_security_check_cooks(id); 
+    
+ /*αναζητα καταλληλο recipe ,το οποιο πρεπει να αντιστοιχιζεται στην εθνικη κουζινα και δεν εχει μπει σε τρια συνεχομενα επεισοδια ή δεν εχει μπει καν στα τρια τελευταια επεισοδια και δεν βρισκονται στο security_purposes_recipes*/
+	SET rname = (SELECT rec_name FROM available_recipes 
+    WHERE (NEW.national_cuisine = national_cuisine) 
+    AND ((SELECT triggering_number FROM security_purposes_recipes WHERE available_recipes.rec_name = security_purposes_recipes.rec_name)<3 
+    OR (available_recipes.rec_name NOT IN (SELECT rec_name FROM security_purposes_recipes )))
+    LIMIT 1);
+	
+    SET NEW.rec_name = rname; 
+ /*διαγραφει αυτο το recipe για αυτο το επεισοδιο*/
+	DELETE FROM available_recipes
+    WHERE rec_name = rname; 
+    
+ /*updates the table security_purposes*/ 
+    CALL updating_security_check_recipes(rname);
+    
+    
+    /*διαγραφει το national cuisine απο το available_national_cuisine μεχρι το τελος του τωρινου επεισοδιου*/ 
+    /*DELETE FROM available_national_cuisines
+    WHERE (national_cuisine = NEW.national_cuisine);*/ 
+    
+    /*updates the table security_purposes_national_cuisine*/
+	CALL update_security_check_national_cuisines(NEW.national_cuisine);
+    
+    
+END;
+//
+DELIMITER ; 
 
 
 
-CALL build_the_contest(2019,2024);
+CALL build_the_contest(2000,2024);
 DROP TRIGGER CooksAndRecipes_inserts_in_result_here; 
 DROP TABLE cooks_recipes_per_episode_ ;
 DROP TABLE  security_purposes_cooks;
