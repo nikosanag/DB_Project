@@ -81,7 +81,7 @@ DELIMITER ;
 DELIMITER // 
 CREATE PROCEDURE updating_security_check_national_cuisines(in name_of_national VARCHAR(50))
 BEGIN
-		IF (SELECT COUNT(*) FROM security_purposes_national_cuisine WHERE national_cuisine = name_of_national) = 0 
+		IF (SELECT COUNT(*) FROM security_purposes_national_cuisine WHERE name_national = name_of_national) = 0 
         THEN INSERT INTO security_purposes_national_cuisine(name_national,triggering_number) VALUE (name_of_national,1);
         
         ELSE 
@@ -203,11 +203,13 @@ BEGIN
     
     
 /*αναζητα καταλληλο cook.Ο καταλληλος ειναι ενας που δεν ειναι ακομα στο security_purposes_cooks ή αν ειναι δεν ειναι το triggering number = 3...και ενας που ανηκει σε αυτη την εθνικη κουζινα*/
-	SET id = (SELECT cook_id FROM available_cooks WHERE (((SELECT triggering_number FROM security_purposes_cooks where available_cooks.cook_id = security_purposes_cooks.cook_id) < 3) 
-    OR (available_cooks.cook_id NOT IN (SELECT cook_id FROM security_purposes_cooks))) 
-    AND (available_cooks.cook_id IN (SELECT cook_id FROM cooks_belongs_to_national_cuisine 
-    WHERE (type_of_national_cuisine_that_belongs_to = NEW.national_cuisine)))
-    LIMIT 1);
+    SET id = (
+    SELECT cook_id FROM available_cooks WHERE ((((SELECT triggering_number FROM security_purposes_cooks where cook_id = security_purposes_cooks.cook_id) < 3) 
+    OR (cook_id NOT IN (SELECT cook_id FROM security_purposes_cooks))) 
+    AND (cook_id IN (SELECT cook_id FROM cooks_belongs_to_national_cuisine 
+    WHERE (type_of_national_cuisine_that_belongs_to = NEW.national_cuisine))))
+    LIMIT 1
+    );
 	
     SET NEW.cook_id = id; 
 
@@ -218,9 +220,9 @@ BEGIN
     
  /*αναζητα καταλληλο recipe ,το οποιο πρεπει να αντιστοιχιζεται στην εθνικη κουζινα και δεν εχει μπει σε τρια συνεχομενα επεισοδια ή δεν εχει μπει καν στα τρια τελευταια επεισοδια και δεν βρισκονται στο security_purposes_recipes*/
 	SET rname = (SELECT rec_name FROM available_recipes 
-    WHERE (NEW.national_cuisine = national_cuisine) 
+    WHERE ((NEW.national_cuisine = national_cuisine) 
     AND ((SELECT triggering_number FROM security_purposes_recipes WHERE available_recipes.rec_name = security_purposes_recipes.rec_name)<3 
-    OR (available_recipes.rec_name NOT IN (SELECT rec_name FROM security_purposes_recipes )))
+    OR (available_recipes.rec_name NOT IN (SELECT rec_name FROM security_purposes_recipes ))))
     LIMIT 1);
 	
     SET NEW.rec_name = rname; 
@@ -237,7 +239,7 @@ BEGIN
     WHERE (national_cuisine = NEW.national_cuisine);*/ 
     
     /*updates the table security_purposes_national_cuisine*/
-	CALL update_security_check_national_cuisines(NEW.national_cuisine);
+	CALL updating_security_check_national_cuisines(NEW.national_cuisine);
     
     
 END;
