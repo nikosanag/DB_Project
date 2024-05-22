@@ -16162,5 +16162,8 @@ VALUES
     (107, "Jamaican"),
     (107, "Brazilian"),
     (107, "Louisiana Creole");
+    
+    INSERT INTO cook_credentials
+    VALUES (7, "Cook", "cook");
 
 

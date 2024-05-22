@@ -145,7 +145,7 @@ current_year INT(11) ,
 episode_number INT(11) ,
 rec_name VARCHAR(50),
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id), /*cook_id dont make sense = > National Cuisine makes*/ 
+PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
 CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
@@ -179,6 +179,13 @@ cook_id INT(11) ,
 PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
 CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
+);
+
+CREATE TABLE cook_credentials(
+cook_id INT(11),
+cook_username VARCHAR(20),
+cook_password VARCHAR(50),
+PRIMARY KEY (cook_id)
 );
 
 DELIMITER //
