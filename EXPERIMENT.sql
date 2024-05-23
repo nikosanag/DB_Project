@@ -167,7 +167,7 @@ ORDER BY RAND();
                                             ;
                                             
 											INSERT INTO winners
-                                            SELECT count_years,count_episodes,cook_id,SUM(grade) avg_grade, cook_category
+                                            SELECT count_years,count_episodes,cook_id,SUM(grade) total_grade, cook_category
                                             FROM (
                                             SELECT contestant_id AS cook_id,grade
                                             FROM evaluation
@@ -185,7 +185,7 @@ ORDER BY RAND();
 													SELECT 5 level_of_cook, 'Chef' cook_category
 												) tempo USING (cook_category)
                                             GROUP BY cook_id
-                                            ORDER BY avg_grade,level_of_cook,RAND()
+                                            ORDER BY total_grade DESC,level_of_cook DESC,RAND()
                                             LIMIT 1
                                             ;
                                             
