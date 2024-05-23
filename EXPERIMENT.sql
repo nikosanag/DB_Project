@@ -11,6 +11,19 @@ DECLARE cook_id_to_enter INT(11);
 DECLARE national_cuisine_to_enter VARCHAR (50);
 DECLARE rec_name_to_enter VARCHAR(50); 
 
+DELETE FROM winners;
+DELETE FROM evaluation;
+DELETE FROM judges;
+DELETE FROM cooks_recipes_per_episode;
+DELETE FROM episodes_per_year;
+
+CREATE TABLE possible_num(
+num INT(11),
+PRIMARY KEY(num)
+);
+
+INSERT INTO possible_num(num) VALUE (1),(2),(3),(4),(5);
+
 CREATE TABLE cooks_recipes_per_episode_(
 current_year INT(11) ,
 episode_number INT(11) ,
@@ -136,6 +149,18 @@ SET count_years = starting_year ;
                                             UPDATE security_purposes_cooks SET triggering_number = triggering_number + 1 WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes); 
                                             DELETE FROM available_cooks WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes);
                                             
+                                            INSERT INTO evaluation(current_year,episode_number,contestant_id,judge_id,grade)
+                                            SELECT count_years,count_episodes, crpe.cook_id, j.cook_id,
+                                            (SELECT num FROM possible_num ORDER BY RAND() LIMIT 1) 
+                                            FROM cooks_recipes_per_episode_ crpe							
+                                            CROSS JOIN
+                                            judges j
+                                            WHERE
+                                            crpe.current_year = count_years
+                                            AND crpe.episode_number = count_episodes 
+                                            AND crpe.current_year = j.current_year 
+                                            AND j.episode_number = crpe.episode_number;
+                                            
                                             
                                             
 											UPDATE security_purposes_cooks SET triggering_number = 0 WHERE (cook_id IN (SELECT cook_id FROM available_cooks));
@@ -154,6 +179,7 @@ SET count_years = starting_year ;
 INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) SELECT current_year,episode_number,rec_name,cook_id FROM cooks_recipes_per_episode_;
 
 /*DROP TABLE cooks_recipes_per_episode_;*/
+DROP TABLE possible_num;
 DROP TABLE  security_purposes_cooks;
 DROP TABLE security_purposes_recipes;
 DROP TABLE security_purposes_national_cuisine;
