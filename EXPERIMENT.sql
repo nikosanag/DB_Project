@@ -6,7 +6,6 @@ BEGIN
 DECLARE count_years INT(11);
 DECLARE count_episodes INT(11);
 DECLARE count_places INT(11);
-DECLARE recipe_name_to_enter INT(11);
 DECLARE cook_id_to_enter INT(11);
 DECLARE national_cuisine_to_enter VARCHAR (50);
 DECLARE rec_name_to_enter VARCHAR(50); 
@@ -38,13 +37,13 @@ CREATE TABLE security_purposes_cooks(
 	triggering_number INT(11),
 	PRIMARY KEY (cook_id)
 );
-
+/*
 CREATE TABLE security_purposes_recipes(
 rec_name VARCHAR(50),
 triggering_number INT(11),
 PRIMARY KEY(rec_name)
 );
-
+*/
 CREATE TABLE security_purposes_national_cuisine(
 name_national VARCHAR(50),
 triggering_number INT(11),
@@ -71,8 +70,10 @@ PRIMARY KEY (national_cuisine)
 INSERT INTO security_purposes_cooks(cook_id,triggering_number) 
 SELECT DISTINCT cook_id,0 FROM cooks ;
 
+/*
 INSERT INTO security_purposes_recipes(rec_name,triggering_number)
 SELECT DISTINCT rec_name,0 FROM recipe;
+*/
 
 INSERT INTO security_purposes_national_cuisine(name_national,triggering_number)
 SELECT DISTINCT type_of_national_cuisine_that_belongs_to,0 FROM cooks_belongs_to_national_cuisine;
@@ -108,7 +109,8 @@ SET count_years = starting_year ;
                                                     SET national_cuisine_to_enter = 
                                                     (
                                                     SELECT national_cuisine FROM available_national_cuisines 
-                                                    WHERE national_cuisine IN (SELECT name_national FROM security_purposes_national_cuisine WHERE triggering_number<3)
+                                                    WHERE national_cuisine IN 
+                                                    (SELECT name_national FROM security_purposes_national_cuisine WHERE triggering_number<3)
                                                     ORDER BY RAND()
                                                     LIMIT 1 
                                                     );
@@ -181,7 +183,7 @@ INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_
 /*DROP TABLE cooks_recipes_per_episode_;*/
 DROP TABLE possible_num;
 DROP TABLE  security_purposes_cooks;
-DROP TABLE security_purposes_recipes;
+/*DROP TABLE security_purposes_recipes;*/
 DROP TABLE security_purposes_national_cuisine;
 DROP TABLE available_national_cuisines;
 DROP TABLE available_recipes;
