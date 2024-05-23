@@ -147,7 +147,8 @@ ORDER BY RAND();
                                                     END;
                                                     END WHILE; 
                                                     
-                                                    
+                                            INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) VALUE (count_years,count_episodes,rec_name_to_enter,cook_id_to_enter); 
+                                             
 											INSERT INTO judges(current_year,episode_number,cook_id) SELECT DISTINCT count_years,count_episodes,cook_id FROM available_cooks WHERE (cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) ORDER BY RAND() LIMIT 3;
                                             UPDATE security_purposes_cooks SET triggering_number = triggering_number + 1 WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes); 
                                             DELETE FROM available_cooks WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes);
@@ -200,8 +201,8 @@ ORDER BY RAND();
 				END;
 				END WHILE;
 
-INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) SELECT current_year,episode_number,rec_name,cook_id FROM cooks_recipes_per_episode_;
-
+/*INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) SELECT current_year,episode_number,rec_name,cook_id FROM cooks_recipes_per_episode_;
+*/
 /*DROP TABLE cooks_recipes_per_episode_;*/
 DROP TABLE possible_num;
 DROP TABLE  security_purposes_cooks;
