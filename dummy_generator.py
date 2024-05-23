@@ -6,13 +6,29 @@ from datetime import datetime
 data = Faker()
 data.add_provider(FoodProvider)
 
+# -------- BIG DATA --------
+# INGREDIENTS = 400
+# FOOD_GROUPS = 12
+# COOKS = 200
+# RECIPES = 300
+# EQUIPMENT = 96
+# THEM_UNITS = 30
 
-INGREDIENTS = 400
+# -------- SMALL DATA --------
+# INGREDIENTS = 300
+# FOOD_GROUPS = 12
+# COOKS = 100
+# RECIPES = 200
+# EQUIPMENT = 50
+# THEM_UNITS = 30
+
+# -------- QUERRY TESTING --------
+INGREDIENTS = 60
 FOOD_GROUPS = 12
-COOKS = 200
-RECIPES = 300
-
-
+COOKS = 30
+RECIPES = 40
+EQUIPMENT = 50
+THEM_UNITS = 30
 
 #--------------------------------------------- FOOD GROUPS ---------------------------------------------
 # NAME  --  primary key
@@ -263,22 +279,22 @@ for i in range(RECIPES):
 
 #---------------------------------------------- EQUIPMENT ---------------------------------------------
 # NAME  --  primary key 
-equipment_name = ["Air fryer", "Bachelor griller", "Barbecue grill", "Beehive oven", "Blender", "Bowl" , "Brasero", "Brazier", "Bread machine", "Burjiko", "Butane torch", "Chapati maker", "Cheesemelter", "Chocolatera", "Chiller" , "Chorkor oven", "Clome oven", "Comal (cookware)", "Combi steamer", "Communal oven", "Convection microwave", "Convection oven", "Corn roaster", "Crepe maker", "Deep fryer", "Earth oven", "Electric cooker", "Espresso machine", "Field kitchen", "Fire pot", "Flattop grill", "Food steamer", "Fufu machine", "Grater" ,"Griddle", "Halogen oven", "Haybox", "Hibachi", "Horno", "Hot box (appliance)", "Hot plate", "Instant Pot", "Kamado", "Kitchener range", "Kujiejun", "Kyoto box", "Makiyakinabe", "Masonry oven", "Mess kit", "Microwave oven", "Multicooker", "Oven", "On2cook", "Pan", "Pancake machine", "Panini sandwich grill", "Popcorn maker", "Pressure cooker", "Pressure fryer", "Reflector oven", "Remoska", "Rice cooker", "Rice polisher", "Roasting jack", "Rocket mass heater", "Rotimatic", "Rotisserie", "Russian oven", "Sabbath mode", "Salamander broiler", "Samovar", "Sandwich toaster", "Self-cleaning oven", "Shichirin", "Slow cooker", "Solar cooker", "Sous-vide cooker", "Soy milk maker", "Stove", "Susceptor", "Tabun oven", "Tandoor", "Tangia", "Thermal immersion circulator", "Toaster and toaster ovens", "Turkey fryer", "Vacuum fryer", "Waffle iron", "Wet grinder", "Wine cooler", "Wood-fired oven", "Coffee percolator", "Coffeemaker", "Electric water boiler", "Instant hot water dispenser", "Kettle"]
+equipment_name = ["Air fryer", "Bachelor griller", "Barbecue grill", "Beehive oven", "Blender", "Bowl" , "Brasero", "Brazier", "Bread machine", "Burjiko", "Butane torch", "Chapati maker", "Cheesemelter", "Chocolatera", "Chiller" , "Chorkor oven", "Clome oven", "Comal (cookware)", "Combi steamer", "Communal oven", "Convection microwave", "Convection oven", "Corn roaster", "Crepe maker", "Deep fryer", "Earth oven", "Electric cooker", "Espresso machine", "Field kitchen", "Fire pot", "Flattop grill", "Food steamer", "Fufu machine", "Grater" ,"Griddle", "Halogen oven", "Haybox", "Hibachi", "Horno", "Hot box (appliance)", "Hot plate", "Instant Pot", "Kamado", "Kitchener range", "Kujiejun", "Kyoto box", "Makiyakinabe", "Masonry oven", "Mess kit", "Microwave oven", "Multicooker", "Oven", "On2cook", "Pan", "Pancake machine", "Panini sandwich grill", "Popcorn maker", "Pressure cooker", "Pressure fryer", "Reflector oven", "Remoska", "Rice cooker", "Rice polisher", "Roasting jack", "Rocket mass heater", "Rotimatic", "Rotisserie", "Russian oven", "Sabbath mode", "Salamander broiler", "Samovar", "Sandwich toaster", "Self-cleaning oven", "Shichirin", "Slow cooker", "Solar cooker", "Sous-vide cooker", "Soy milk maker", "Stove", "Susceptor", "Tabun oven", "Tandoor", "Tangia", "Thermal immersion circulator", "Toaster and toaster ovens", "Turkey fryer", "Vacuum fryer", "Waffle iron", "Wet grinder", "Wine cooler", "Wood-fired oven", "Coffee percolator", "Coffeemaker", "Electric water boiler", "Instant hot water dispenser", "Kettle"][:EQUIPMENT]
 
 # MANUAL
 instruction_manual = []
-for _ in range(len(equipment_name)):
+for _ in range(EQUIPMENT):
   instruction_manual.append(data.sentence() + ' ' + data.sentence() + ' ' + data.sentence())
 
 # IMAGE URL
 image_of_equipment = []
-for _ in range(len(equipment_name)):
+for _ in range(EQUIPMENT):
   url = f"https://dummyimage.com/{random.randint(1000,2000)}x{random.randint(1000,2000)}"
   image_of_equipment.append(url)
 
 # IMAGE DESCRIPTION
 image_of_equipment_desc = []
-for _ in range(len(equipment_name)):
+for _ in range(EQUIPMENT):
   image_of_equipment_desc.append(data.sentence())
 # -----------------------------------------------------------------------------------------------------
 
@@ -327,13 +343,13 @@ description_of_thematic_unit = ["Delicious desserts traditionally enjoyed during
 
 # IMAGE URL
 image_of_thematic_unit = []
-for _ in range(len(name_of_thematic_unit)):
+for _ in range(THEM_UNITS):
   url = f"https://dummyimage.com/{random.randint(1000,2000)}x{random.randint(1000,2000)}"
   image_of_thematic_unit.append(url)
 
 # IMAGE DESCRIPTION
 image_of_thematic_unit_desc = []
-for _ in range(len(name_of_thematic_unit)):
+for _ in range(THEM_UNITS):
   image_of_thematic_unit_desc.append(data.sentence())
 # -----------------------------------------------------------------------------------------------------
 
@@ -502,9 +518,9 @@ for i in range(RECIPES):
 
 # equipment
 data_insertions += "INSERT INTO equipment\nVALUES"
-for i in range(len(equipment_name)):  
+for i in range(EQUIPMENT):  
   data_insertions += f'\n    ("{equipment_name[i]}", "{instruction_manual[i]}", "{image_of_equipment[i]}", "{image_of_equipment_desc[i]}")'
-  if i < len(equipment_name) - 1:
+  if i < EQUIPMENT - 1:
     data_insertions += ','
   else:
     data_insertions += ';\n\n\n'
@@ -533,9 +549,9 @@ for i in range(RECIPES):
 
 # thematic_unit
 data_insertions += "INSERT INTO thematic_unit\nVALUES"
-for i in range(len(name_of_thematic_unit)):  
+for i in range(THEM_UNITS):  
   data_insertions += f'\n    ("{name_of_thematic_unit[i]}", "{description_of_thematic_unit[i]}", "{image_of_thematic_unit[i]}", "{image_of_thematic_unit_desc[i]}")'
-  if i < len(name_of_thematic_unit) - 1:
+  if i < THEM_UNITS - 1:
     data_insertions += ','
   else:
     data_insertions += ';\n\n\n'
@@ -571,9 +587,10 @@ for i in range(COOKS):
     else:
       data_insertions += ';\n\n\n'
 
+data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'INSERTIONS.sql'
+filename = 'QUERRY_TESTING.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)
