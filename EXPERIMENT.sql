@@ -79,7 +79,9 @@ INSERT INTO security_purposes_national_cuisine(name_national,triggering_number)
 SELECT DISTINCT type_of_national_cuisine_that_belongs_to,0 FROM cooks_belongs_to_national_cuisine;
 
 SET count_years = starting_year ;
-		
+INSERT INTO available_recipes(rec_name,national_cuisine) 
+SELECT DISTINCT rec_name,national_cuisine FROM recipe 
+ORDER BY RAND();
 			
             WHILE (count_years <= ending_year) DO
 				BEGIN
@@ -95,9 +97,7 @@ SET count_years = starting_year ;
                                             SELECT DISTINCT cook_id,type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
                                             ORDER BY RAND(); 
                                             
-                                            INSERT INTO available_recipes(rec_name,national_cuisine) 
-                                            SELECT DISTINCT rec_name,national_cuisine FROM recipe 
-                                            ORDER BY RAND();
+                                          
                                             
                                             INSERT INTO available_national_cuisines(national_cuisine) 
                                             SELECT  DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
@@ -136,6 +136,7 @@ SET count_years = starting_year ;
                                                     (
                                                     SELECT rec_name FROM available_recipes 
                                                     WHERE national_cuisine = national_cuisine_to_enter 
+                                                    ORDER BY RAND()
                                                     LIMIT 1
                                                     );
                                                     
@@ -169,7 +170,7 @@ SET count_years = starting_year ;
                                             UPDATE security_purposes_national_cuisine SET triggering_number = 0 WHERE (name_national IN (SELECT national_cuisine FROM available_national_cuisines));
                                             DELETE FROM available_cooks;
                                             DELETE FROM available_national_cuisines;
-                                            DELETE FROM available_recipes;
+                                            /*DELETE FROM available_recipes;*/
 											SET count_episodes = count_episodes + 1;
                                     END;
                                     END WHILE;
