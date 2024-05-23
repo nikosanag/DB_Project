@@ -96,6 +96,7 @@ SET count_years = starting_year ;
                                                     (
                                                     SELECT national_cuisine FROM available_national_cuisines 
                                                     WHERE national_cuisine IN (SELECT name_national FROM security_purposes_national_cuisine WHERE triggering_number<3)
+                                                    ORDER BY RAND()
                                                     LIMIT 1 
                                                     );
                                                     
@@ -108,6 +109,7 @@ SET count_years = starting_year ;
                                                     (
                                                     SELECT cook_id FROM available_cooks WHERE (cook_id IN (SELECT cook_id FROM security_purposes_national_cuisine WHERE triggering_number<3)) 
 													AND ((cook_id,national_cuisine_to_enter) IN (SELECT cook_id,national_cuisine FROM available_cooks))
+                                                    ORDER BY RAND()
                                                     LIMIT 1
                                                     );
                                                     
@@ -128,8 +130,10 @@ SET count_years = starting_year ;
                                                     SET count_places = count_places + 1; 
                                                     END;
                                                     END WHILE; 
-											INSERT INTO judges(current_year,episode_number,cook_id) SELECT DISTINCT count_years,count_episodes,cook_id FROM available_cooks LIMIT 3;
-                                            UPDATE security_purposes_cooks SET triggering_number = triggering_number+1 WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes); 
+                                                    
+                                                    
+											INSERT INTO judges(current_year,episode_number,cook_id) SELECT DISTINCT count_years,count_episodes,cook_id FROM available_cooks WHERE (cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) ORDER BY RAND() LIMIT 3;
+                                            UPDATE security_purposes_cooks SET triggering_number = triggering_number + 1 WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes); 
                                             DELETE FROM available_cooks WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes);
                                             
                                             
