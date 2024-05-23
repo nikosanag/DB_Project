@@ -156,13 +156,12 @@ ORDER BY RAND();
                                             SELECT count_years,count_episodes, crpe.cook_id, j.cook_id,
                                             (SELECT num FROM possible_num ORDER BY RAND() LIMIT 1) 
                                             FROM cooks_recipes_per_episode_ crpe							
-                                            CROSS JOIN
-                                            judges j
-                                            WHERE
+                                            JOIN
+                                            judges j ON crpe.current_year = j.current_year AND j.episode_number = crpe.episode_number
+                                            WHERE 
                                             crpe.current_year = count_years
-                                            AND crpe.episode_number = count_episodes 
-                                            AND crpe.current_year = j.current_year 
-                                            AND j.episode_number = crpe.episode_number;
+                                            AND crpe.episode_number = count_episodes
+                                            ;
                                             
                                             
                                             
