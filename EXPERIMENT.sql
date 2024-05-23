@@ -193,4 +193,4 @@ END;
 //
 DELIMITER ;
 
-CALL build_contest(2019,2024);
+CALL build_contest(2020,2024);
