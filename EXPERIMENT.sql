@@ -68,7 +68,7 @@ PRIMARY KEY (national_cuisine)
 );
 
 INSERT INTO security_purposes_cooks(cook_id,triggering_number) 
-SELECT  cook_id,0 FROM cooks ;
+SELECT  DISTINCT cook_id,0 FROM cooks ;
 
 /*
 INSERT INTO security_purposes_recipes(rec_name,triggering_number)
