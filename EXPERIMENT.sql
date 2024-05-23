@@ -100,7 +100,7 @@ ORDER BY RAND();
                                           
                                             
                                             INSERT INTO available_national_cuisines(national_cuisine) 
-                                            SELECT   type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
+                                            SELECT  DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
                                             ORDER BY RAND();
                                             
                                             WHILE (count_places<=10) DO 
