@@ -163,6 +163,28 @@ ORDER BY RAND();
                                             AND crpe.episode_number = count_episodes
                                             ;
                                             
+											INSERT INTO winners
+                                            SELECT count_years,count_episodes,cook_id,SUM(grade) avg_grade, cook_category
+                                            FROM (
+                                            SELECT contestant_id AS cook_id,grade
+                                            FROM evaluation
+                                            WHERE current_year= count_years AND episode_number = count_episodes) temp
+                                            JOIN cooks USING (cook_id)
+                                            JOIN(
+													SELECT 1 level_of_cook, 'C Cook' cook_category
+													UNION
+													SELECT 2 level_of_cook, 'B Cook' cook_category
+													UNION
+													SELECT 3 level_of_cook, 'A Cook' cook_category
+													UNION
+													SELECT 4 level_of_cook, "Chef's Assistant" cook_category
+													UNION
+													SELECT 5 level_of_cook, 'Chef' cook_category
+												) tempo USING (cook_category)
+                                            GROUP BY cook_id
+                                            ORDER BY avg_grade,level_of_cook,RAND()
+                                            LIMIT 1
+                                            ;
                                             
                                             
 											UPDATE security_purposes_cooks SET triggering_number = 0 WHERE (cook_id IN (SELECT cook_id FROM available_cooks));
