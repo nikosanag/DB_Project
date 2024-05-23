@@ -59,7 +59,7 @@ CREATE TABLE available_cooks (
 CREATE TABLE available_recipes(
 	rec_name VARCHAR(50),
 	national_cuisine VARCHAR(50), 
-	PRIMARY KEY(rec_name,national_cuisine)
+	PRIMARY KEY(rec_name)
 );
 
 CREATE TABLE available_national_cuisines(
@@ -68,7 +68,7 @@ PRIMARY KEY (national_cuisine)
 );
 
 INSERT INTO security_purposes_cooks(cook_id,triggering_number) 
-SELECT DISTINCT cook_id,0 FROM cooks ;
+SELECT  cook_id,0 FROM cooks ;
 
 /*
 INSERT INTO security_purposes_recipes(rec_name,triggering_number)
@@ -94,13 +94,13 @@ ORDER BY RAND();
                                             INSERT INTO episodes_per_year(current_year,episode_number) VALUE (count_years,count_episodes) ; 
                                             
                                             INSERT INTO available_cooks(cook_id,national_cuisine) 
-                                            SELECT DISTINCT cook_id,type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
+                                            SELECT  cook_id,type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
                                             ORDER BY RAND(); 
                                             
                                           
                                             
                                             INSERT INTO available_national_cuisines(national_cuisine) 
-                                            SELECT  DISTINCT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
+                                            SELECT   type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine 
                                             ORDER BY RAND();
                                             
                                             WHILE (count_places<=10) DO 
