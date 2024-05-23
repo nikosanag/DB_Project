@@ -178,7 +178,7 @@ CREATE TABLE winners(
 current_year INT(11) ,
 episode_number INT(11) ,
 cook_id INT(11) ,
-avg_cook_grade NUMERIC(3,2) CHECK (avg_cook_grade<=5 AND avg_cook_grade>=1),
+total_cook_grade INT(11) CHECK (total_cook_grade >= 3 AND total_cook_grade<= 15),
 cook_category VARCHAR(50) CHECK(cook_category IN ('C Cook', 'B Cook', 'A Cook', 'Chef', "Chef's Assistant")),
 PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_winners_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
