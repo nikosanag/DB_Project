@@ -6,5 +6,11 @@ data = Faker()
 data.add_provider(FoodProvider)
 
 
-name_of_thematic_unit = ["Thanksgiving desserts", "Christmas desserts", "Easter desserts", "Risotto dishes", "Summer salads", "Holiday appetizers", "Breakfast smoothies", "Pasta salads", "Picnic sandwiches", "Grilled vegetable dishes", "Baked goods", "Soup varieties", "Smoothie bowls", "Healthy snack options", "One-pot meals", "Casserole dishes", "Brunch items", "Quick stir-fries", "Frozen desserts", "Energy bites", "Sheet pan dinners", "Fruit salads", "Cold noodle dishes", "Barbecue sides", "Chilled soups", "Grain bowls", "Savory tarts", "Hot pot dishes", "Oven-roasted vegetables", "Finger foods"]
-print(len(name_of_thematic_unit))
+national_cuisine = []
+
+for _ in range(118):
+  x = data.unique.ethnic_category()
+  national_cuisine.append(x)
+
+for i in range(len(national_cuisine)):
+  print(national_cuisine[i])

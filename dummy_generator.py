@@ -6,29 +6,32 @@ from datetime import datetime
 data = Faker()
 data.add_provider(FoodProvider)
 
-# -------- BIG DATA --------
+# # -------- BIG DATA --------
 # INGREDIENTS = 400
 # FOOD_GROUPS = 12
 # COOKS = 200
 # RECIPES = 300
 # EQUIPMENT = 96
 # THEM_UNITS = 30
+# NATIONAL_CUISINES = 118
 
 # -------- SMALL DATA --------
-# INGREDIENTS = 300
-# FOOD_GROUPS = 12
-# COOKS = 100
-# RECIPES = 200
-# EQUIPMENT = 50
-# THEM_UNITS = 30
-
-# -------- QUERRY TESTING --------
-INGREDIENTS = 60
+INGREDIENTS = 250
 FOOD_GROUPS = 12
-COOKS = 30
-RECIPES = 40
+COOKS = 100
+RECIPES = 200
 EQUIPMENT = 50
 THEM_UNITS = 30
+NATIONAL_CUISINES = 40
+
+# # -------- QUERRY TESTING --------
+# INGREDIENTS = 60
+# FOOD_GROUPS = 12
+# COOKS = 30
+# RECIPES = 40
+# EQUIPMENT = 50
+# THEM_UNITS = 30
+# NATIONAL_CUISINES = 20
 
 #--------------------------------------------- FOOD GROUPS ---------------------------------------------
 # NAME  --  primary key
@@ -94,7 +97,11 @@ for _ in range(INGREDIENTS):
 # NAME OF FOOD GROUP  --  foreign key references FOOD GROUP
 ingredient_of_food_group = []
 for _ in range(INGREDIENTS):
-  ingredient_of_food_group.append(random.choice(name_of_food_group))
+  dice = random.randint(1, 10)
+  if dice <= 3:
+    ingredient_of_food_group.append(random.choice(name_of_food_group))
+  else:
+    ingredient_of_food_group.append(random.choice(name_of_food_group[:5]))
 
 # IMAGE URL
 image_of_ingredient = []
@@ -178,12 +185,14 @@ for _ in range(RECIPES):
   grams_of_proteins_per_portion.append(random.randint(10, 45))
 
 # NATIONAL CUISINE
-national_cuisine = []
-existing_cuisines = set()
+recipe_belongs_to_national_cuisine = []
+all_national_cuisines = []
+for _ in range(118):
+  all_national_cuisines.append(data.unique.ethnic_category())
+
+existing_cuisines = random.sample(all_national_cuisines, NATIONAL_CUISINES)
 for _ in range(RECIPES):
-  x = data.ethnic_category()
-  national_cuisine.append(x)
-  existing_cuisines.add(x)
+  recipe_belongs_to_national_cuisine.append(random.choice(existing_cuisines))
 
 # IMAGE URL
 image_of_recipe = []
@@ -426,7 +435,7 @@ for _ in range(COOKS):
 #---------------------------------- COOK BELONGS TO NATIONAL CUISINE ----------------------------------
 # COOK (with id - 1) i BELONGS TO LIST OF NATIONAL CUISINES
 cooks_belongs_to_national_cuisine = []
-c = list(existing_cuisines)
+c = existing_cuisines
 for _ in range(COOKS):
   cooks_belongs_to_national_cuisine.append([])
 
@@ -466,7 +475,7 @@ for i in range(INGREDIENTS):
 # recipe
 data_insertions += "INSERT INTO recipe\nVALUES"
 for i in range(RECIPES):  
-  data_insertions += f'\n    ("{rec_name[i]}", "{rec_type[i]}", {level_of_diff[i]}, "{short_descr[i]}", {prep_time[i]}, {cooking_time[i]}, {portions[i]}, "{name_of_main_ingredient[i]}", {grams_of_fat_per_portion[i]}, {grams_of_carbohydrates_per_portion[i]}, {grams_of_proteins_per_portion[i]}, 0 ,"{national_cuisine[i]}", "{image_of_recipe[i]}", "{image_of_recipe_desc[i]}")'
+  data_insertions += f'\n    ("{rec_name[i]}", "{rec_type[i]}", {level_of_diff[i]}, "{short_descr[i]}", {prep_time[i]}, {cooking_time[i]}, {portions[i]}, "{name_of_main_ingredient[i]}", {grams_of_fat_per_portion[i]}, {grams_of_carbohydrates_per_portion[i]}, {grams_of_proteins_per_portion[i]}, 0 ,"{recipe_belongs_to_national_cuisine[i]}", "{image_of_recipe[i]}", "{image_of_recipe_desc[i]}")'
   if i < RECIPES - 1:
     data_insertions += ','
   else:
@@ -590,7 +599,7 @@ for i in range(COOKS):
 data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'QUERRY_TESTING.sql'
+filename = 'INSERTIONS_SMALL.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)
