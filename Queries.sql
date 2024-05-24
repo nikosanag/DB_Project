@@ -119,16 +119,16 @@ FROM(
 GROUP BY current_year;
 
 -- 3.10
-DROP TABLE IF EXISTS `nat_cus_year_apps`;
-
+-- Store the number of apps of each national cuisine for each year.
+-- If a cuisine does not appear in a year, then number of apps will be null.
 CREATE TEMPORARY TABLE nat_cus_year_apps
 SELECT DISTINCT current_year, national_cuisine, Number_of_apps
 FROM episodes_per_year
 JOIN (
-	SELECT national_cuisine
+	SELECT DISTINCT national_cuisine
 	FROM cooks_recipes_per_episode
 	JOIN recipe USING(rec_name)
-) nat_cus_appearing
+) nat_cus_appearing -- creates a table with every possible combination (year,national cuisine that has ever appeared).
 LEFT JOIN (
 	SELECT current_year, national_cuisine, COUNT(rec_name) Number_of_apps
 	FROM(
@@ -137,32 +137,34 @@ LEFT JOIN (
 		JOIN recipe USING(rec_name)
 	) nat_cus_rec_per_year
 	GROUP BY current_year, national_cuisine
-) apps_of_nat_cus_per_year USING (current_year, national_cuisine)
+) apps_of_nat_cus_per_year USING (current_year, national_cuisine) -- This subquery finds the cuisines that appear each year
+																	-- and their apps that year.
 ;
 
 
-DROP TABLE IF EXISTS `nat_cus_min_3apps_per_year`;
-
+-- Exclude national cuisines that do not appear at least 3 times each year.
 CREATE TEMPORARY TABLE nat_cus_min_3apps_per_year
 SELECT current_year, national_cuisine, Number_of_apps
 FROM nat_cus_year_apps
 WHERE national_cuisine NOT IN (SELECT DISTINCT national_cuisine
 								FROM nat_cus_year_apps
 								WHERE Number_of_apps IS NULL OR Number_of_apps <3
-                                )
+                                ) -- This subquery finds the national cuisines that appeared less than 3 times at least 1 year.
 ;
 
-DROP TABLE IF EXISTS `nat_cus_apps_per_2years`;
 
+-- Find the amount of apps across 2 years of the remaining national cuisines.
 CREATE TEMPORARY TABLE nat_cus_apps_per_2years
 SELECT a.current_year first_year, b.current_year second_year, a.national_cuisine, a.Number_of_apps+b.Number_of_apps Number_of_apps
 FROM nat_cus_min_3apps_per_year a
 JOIN nat_cus_min_3apps_per_year b ON a.current_year = b.current_year-1 AND a.national_cuisine = b.national_cuisine
 ;
 
-SELECT a.first_year first_year, a.second_year second_year, a.national_cuisine first_national_cuisine, b.national_cuisine second_national_cuisine, a.Number_of_apps Number_of_apps
+-- Keep only the cuisines that have the same amount of apps with other cuisines across two years.
+SELECT DISTINCT a.first_year first_year, a.second_year second_year, 
+				a.national_cuisine national_cuisine, a.Number_of_apps Number_of_apps
 FROM nat_cus_apps_per_2years a
-JOIN nat_cus_apps_per_2years b ON a.national_cuisine < b.national_cuisine AND a.Number_of_apps = b.Number_of_apps AND a.first_year=b.first_year
+JOIN nat_cus_apps_per_2years b ON a.first_year=b.first_year AND a.national_cuisine != b.national_cuisine AND a.Number_of_apps = b.Number_of_apps 
 ORDER BY first_year, Number_of_apps
 ;
 
