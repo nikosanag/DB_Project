@@ -98,10 +98,10 @@ for _ in range(INGREDIENTS):
 ingredient_of_food_group = []
 for _ in range(INGREDIENTS):
   dice = random.randint(1, 10)
-  if dice <= 3:
+  if dice <= 2:
     ingredient_of_food_group.append(random.choice(name_of_food_group))
   else:
-    ingredient_of_food_group.append(random.choice(name_of_food_group[:5]))
+    ingredient_of_food_group.append(random.choice(name_of_food_group[:4]))
 
 # IMAGE URL
 image_of_ingredient = []
@@ -435,7 +435,7 @@ for _ in range(COOKS):
 #---------------------------------- COOK BELONGS TO NATIONAL CUISINE ----------------------------------
 # COOK (with id - 1) i BELONGS TO LIST OF NATIONAL CUISINES
 cooks_belongs_to_national_cuisine = []
-c = existing_cuisines
+
 for _ in range(COOKS):
   cooks_belongs_to_national_cuisine.append([])
 
@@ -446,10 +446,9 @@ for cuisine in existing_cuisines:
 
 for cook in cooks_belongs_to_national_cuisine:
   if cook == []:
-    rng = random.randint(1, 3)
-    for i in range(rng):
-      cook.append(random.choice(c))
+    cook += random.sample(existing_cuisines, random.randint(1, 3))
 # -----------------------------------------------------------------------------------------------------
+
 
 
 #------------------------------------------ FILE GENERATION -------------------------------------------
@@ -518,6 +517,12 @@ for i in range(RECIPES):
 data_insertions += "INSERT INTO tips\nVALUES"
 for i in range(RECIPES):
   rhtp = len(recipe_has_tip[i])
+  if rhtp == 0:
+    if i == RECIPES - 1:
+      data_insertions += ';\n\n\n'
+      break
+    else:
+      continue
   for j in range(rhtp):
     data_insertions += f'\n    ("{rec_name[i]}", "{recipe_has_tip[i][j]}")'
     if i < RECIPES - 1 or j < rhtp - 1:
@@ -599,7 +604,7 @@ for i in range(COOKS):
 data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'INSERTIONS_SMALL_5.sql'
+filename = 'INSERTIONS_SMALL_2.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)

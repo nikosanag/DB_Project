@@ -6,11 +6,11 @@ data = Faker()
 data.add_provider(FoodProvider)
 
 
-national_cuisine = []
 
+recipe_belongs_to_national_cuisine = []
+all_national_cuisines = []
 for _ in range(118):
-  x = data.unique.ethnic_category()
-  national_cuisine.append(x)
+  all_national_cuisines.append(data.unique.ethnic_category())
 
-for i in range(len(national_cuisine)):
-  print(national_cuisine[i])
+x = list(set(all_national_cuisines))
+
