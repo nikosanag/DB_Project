@@ -22,7 +22,7 @@ COOKS = 100
 RECIPES = 200
 EQUIPMENT = 50
 THEM_UNITS = 30
-NATIONAL_CUISINES = 40
+NATIONAL_CUISINES = 30
 
 # # -------- QUERRY TESTING --------
 # INGREDIENTS = 60
@@ -599,7 +599,7 @@ for i in range(COOKS):
 data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'INSERTIONS_SMALL.sql'
+filename = 'INSERTIONS_SMALL_5.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)
