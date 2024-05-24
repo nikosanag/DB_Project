@@ -111,9 +111,11 @@ ORDER BY RAND();
                                                     SET national_cuisine_to_enter = 
                                                     (
                                                     SELECT national_cuisine FROM available_national_cuisines 
-                                                    WHERE national_cuisine IN 
-                                                    (SELECT name_national FROM security_purposes_national_cuisine WHERE triggering_number<3)
-                                                    ORDER BY RAND()
+                                                    WHERE 
+                                                    national_cuisine IN (SELECT name_national FROM security_purposes_national_cuisine WHERE triggering_number<3)
+                                                    AND 
+                                                    national_cuisine IN (SELECT national_cuisine FROM available_cooks WHERE cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) 
+													ORDER BY RAND()
                                                     LIMIT 1 
                                                     );
                                                     
@@ -124,7 +126,9 @@ ORDER BY RAND();
                                                     
 											        SET cook_id_to_enter = 
                                                     (
-                                                    SELECT cook_id FROM available_cooks WHERE (cook_id IN (SELECT cook_id FROM security_purposes_national_cuisine WHERE triggering_number<3)) 
+                                                    SELECT cook_id FROM available_cooks 
+                                                    WHERE 
+                                                    (cook_id IN (SELECT cook_id FROM security_purposes_national_cuisine WHERE triggering_number<3)) 
 													AND ((cook_id,national_cuisine_to_enter) IN (SELECT cook_id,national_cuisine FROM available_cooks))
                                                     ORDER BY RAND()
                                                     LIMIT 1
@@ -145,7 +149,8 @@ ORDER BY RAND();
                                                     INSERT INTO cooks_recipes_per_episode_(current_year,episode_number,national_cuisine,rec_name,cook_id) 
                                                     VALUE (count_years,count_episodes,national_cuisine_to_enter,rec_name_to_enter,cook_id_to_enter);
                                                     
-                                                    INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) VALUE (count_years,count_episodes,rec_name_to_enter,cook_id_to_enter); 
+                                                    INSERT INTO cooks_recipes_per_episode(current_year,episode_number,rec_name,cook_id) 
+                                                    VALUE (count_years,count_episodes,rec_name_to_enter,cook_id_to_enter); 
                                                     
                                                     SET count_places = count_places + 1; 
                                                     END;
