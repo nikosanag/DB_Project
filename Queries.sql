@@ -20,7 +20,7 @@ FROM cooks
 JOIN cooks_recipes_per_episode USING (cook_id)
 JOIN cooks_belongs_to_national_cuisine USING (cook_id)
 JOIN recipe USING (rec_name)
-WHERE current_year=2022 AND type_of_national_cuisine_that_belongs_to='Ainu' 
+WHERE current_year=2022 AND type_of_national_cuisine_that_belongs_to='Ainu' -- possible index and below as well
 AND national_cuisine='Ainu' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
 -- If we do not want that we can comment it out. 
 -- Then the query would find any cook that belongs to this national cuisine and participated to an episode that year, even if
@@ -52,15 +52,15 @@ WHERE cook_id NOT IN (SELECT cook_id
 -- 3.5
 -- Το να τύχει ένας κριτής να συμμετάσχει πάνω από 3 φορές σε ένα έτος είναι μεν εφικτό, είναι δε αρκετά απίθανο.
 WITH appearances AS (
-	SELECT current_year , CONCAT(name_of_cook,' ',surname_of_cook) Cook_name, COUNT(episode_number) Number_of_Appearances
+	SELECT current_year , cook_id, COUNT(episode_number) Number_of_Appearances
 	FROM judges
-	JOIN cooks USING (cook_id)
-	GROUP BY current_year, Cook_name
+	GROUP BY current_year, cook_id
 	HAVING Number_of_Appearances>3
 	ORDER BY current_year, Number_of_Appearances) -- this subquery finds the number appearances of its judge per year.
-SELECT a.current_year, a.Cook_name, a.Number_of_Appearances
+SELECT a.current_year, CONCAT(name_of_cook,' ',surname_of_cook) Cook_name, a.Number_of_Appearances
 FROM appearances a
-JOIN ( SELECT current_year, Number_of_Appearances, COUNT(Cook_name) apps_count
+JOIN cooks USING (cook_id)
+JOIN ( SELECT current_year, Number_of_Appearances, COUNT(cook_id) apps_count
 		FROM appearances
 		GROUP BY current_year, Number_of_Appearances
 		HAVING apps_count>1) b USING (current_year, Number_of_Appearances) -- this subquery finds which number of appearances that appear more than once.
@@ -274,11 +274,11 @@ WHERE name_of_food_group NOT IN(
 	SELECT name_of_food_group
 	FROM cooks_recipes_per_episode
 	JOIN recipe USING (rec_name)
-	JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
+	JOIN ingredients ON name_of_main_ingredient=name_of_ingredient -- maybe trigger
 	JOIN food_group USING (name_of_food_group)
 );
 
-/*
+
 
 -- created a test database to test the queries without needing to worry about foreign key constraints
 -- if you go further down you will find the exercise queries for the test database 
@@ -578,76 +578,40 @@ PRIMARY KEY (name_of_ingredient,rec_name)
 create index tag
 on tags (tag_name);
 
+EXPLAIN format = json
 SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
 FROM(
-SELECT current_year, episode_number, competition.rec_name recipe, a.tag_name a_tag_name, b.tag_name b_tag_name
-FROM cooks_recipes_per_episode competition
-JOIN tags a IGNORE INDEX (tag_name) USING (rec_name) 
-JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
-ORDER BY current_year, episode_number, competition.rec_name
-) temp1
-GROUP BY a_tag_name, b_tag_name;
+	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
+	FROM cooks_recipes_per_episode competition
+	JOIN tags a USING (rec_name)
+	JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
+							-- The couple is contained in the query as many times as it appears in the competition.
+GROUP BY a_tag_name, b_tag_name
+ORDER BY Tag_Couple_Appearances DESC
+LIMIT 3;
 
 alter table tags
 drop index tag;
 
 
 -- 3.8
+explain format=json
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
 	FROM cooks_recipes_per_episode
 	JOIN uses_equipment USING (rec_name)
-	GROUP BY current_year, episode_number)
+	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
 SELECT current_year, episode_number, Amount_of_Equipment
 FROM amount
 WHERE Amount_of_Equipment= (
 	SELECT MAX(Amount_of_Equipment)
 	FROM amount
-    );
+    ) -- This subquery finds the max amount of equipment an episode any had.
+    -- The overall query could find more than 1 episode in case of a draw. 
+    -- (More than 1 episode could have the max amount of equipment)
+   ; 
 
-
-
-
--- 3.10
-INSERT INTO episodes_per_year
-VALUES(2002,1);
-
-INSERT INTO recipe
-VALUES ('something1',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
-		('something2',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
-        ('something3',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Brasilian'),
-        ('somethingelse1',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian'),
-		('somethingelse2',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian'),
-        ('somethingelse3',DEFAULT,1,NULL,34,34,4,'FCSD',23,23,23,12,'Argentinian');
-
-INSERT INTO cooks_recipes_per_episode
-VALUES (2000,1,'something1',20),
-		(2000,1,'something2',21),
-        (2000,1,'something3',22),
-        (2001,1,'something1',20),
-        (2001,2,'something2',21),
-        (2001,3,'something3',22),
-        (2002,1,'something1',20),
-		(2002,1,'something2',21),
-        (2002,1,'something3',22),
-        (2000,1,'somethingelse1',30),
-		(2000,1,'somethingelse2',31),
-        (2000,1,'somethingelse3',32),
-        (2001,1,'somethingelse1',30),
-        (2001,2,'somethingelse2',31),
-        (2001,3,'somethingelse3',32),
-        (2002,1,'somethingelse1',30),
-		(2002,1,'somethingelse2',31),
-        (2002,1,'somethingelse3',32);
-
-DELETE FROM recipe
-WHERE national_cuisine IN ('Brasilian','Argentinian');
-
-DELETE FROM episodes_per_year
-WHERE current_year=2002;
-
-DELETE FROM cooks_recipes_per_episode
-WHERE rec_name IN ('something1','something2','something3','somethingelse1','somethingelse2','somethingelse3');
 
 
 
