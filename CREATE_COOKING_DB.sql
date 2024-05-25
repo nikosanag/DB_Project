@@ -21,6 +21,14 @@ PRIMARY KEY (name_of_ingredient),
 CONSTRAINT f_key_ingredients_food_group FOREIGN KEY (name_of_food_group) REFERENCES food_group (name_of_food_group)
 );
 
+CREATE TABLE needs_ingredient(
+name_of_ingredient VARCHAR(50),
+rec_name VARCHAR(50),
+quantity VARCHAR(50),
+PRIMARY KEY (name_of_ingredient,rec_name),
+CONSTRAINT f_key_needs_ingredient_ingredients FOREIGN KEY (name_of_ingredient) REFERENCES ingredients (name_of_ingredient)
+);
+
 CREATE TABLE recipe(
 rec_name varchar(50), 
 rec_type varchar(50) DEFAULT 'Regular' CHECK(rec_type IN ('Pastry','Regular')),
@@ -38,16 +46,7 @@ national_cuisine VARCHAR(50),
 image_of_recipe VARCHAR(50),
 image_of_recipe_desc VARCHAR(100), 
 PRIMARY KEY (rec_name),
-CONSTRAINT f_key_recipe_ingredients FOREIGN KEY (name_of_main_ingredient) REFERENCES ingredients (name_of_ingredient)
-);
-
-CREATE TABLE needs_ingredient(
-name_of_ingredient VARCHAR(50),
-rec_name VARCHAR(50),
-quantity VARCHAR(50),
-PRIMARY KEY (name_of_ingredient,rec_name),
-CONSTRAINT f_key_needs_ingredient_recipe FOREIGN KEY (rec_name) REFERENCES recipe (rec_name),
-CONSTRAINT f_key_needs_ingredient_ingredients FOREIGN KEY (name_of_ingredient) REFERENCES ingredients (name_of_ingredient)
+CONSTRAINT f_key_recipe_ingredients FOREIGN KEY (name_of_main_ingredient,rec_name) REFERENCES needs_ingredient (name_of_ingredient,rec_name)
 );
 
 
