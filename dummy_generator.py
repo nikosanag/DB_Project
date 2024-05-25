@@ -412,10 +412,15 @@ for _ in range(COOKS):
   date_of_birth.append(str(b))
 
 # CATEGORY
-categories = ['C Cook', 'B Cook', 'A Cook', 'Chef', "Chef's Assistant"]
+categories = ['C Cook', 'B Cook', 'A Cook', "Chef's Assistant"]
 cook_category = []
 for _ in range(COOKS):
   cook_category.append(random.choice(categories))
+
+chefs = random.sample(range(COOKS), 16)
+for c in chefs:
+  cook_category[c] = 'Chef'
+
 
 # IMAGE URL
 image_of_cook = []
@@ -519,7 +524,9 @@ for i in range(RECIPES):
   rhtp = len(recipe_has_tip[i])
   if rhtp == 0:
     if i == RECIPES - 1:
-      data_insertions += ';\n\n\n'
+      new = data_insertions[:len(data_insertions) - 1]
+      data_insertions = new + ';\n\n\n'
+      # data_insertions += '\n\n\n'
       break
     else:
       continue
@@ -604,7 +611,7 @@ for i in range(COOKS):
 data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'INSERTIONS_SMALL_2.sql'
+filename = 'INSERTIONS_SMALL_16.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)
