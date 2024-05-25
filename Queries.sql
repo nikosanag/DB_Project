@@ -6,7 +6,6 @@ JOIN cooks ON contestant_id=cook_id
 GROUP BY 1;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
--- explain format=json
 SELECT national_cuisine 'National Cuisine', AVG(grade)
 FROM cooks_recipes_per_episode a
 JOIN recipe USING (rec_name)
@@ -14,11 +13,6 @@ JOIN evaluation b ON (a.current_year,a.episode_number,a.cook_id)=(b.current_year
 GROUP BY national_cuisine;
 
 -- 3.2
-/*create index national_cuisine_idx on recipe(national_cuisine);
-create index type_of_national_cuisine_that_belongs_to_idx on cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to);
-*/
-
--- explain format=json
 SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
 						type_of_national_cuisine_that_belongs_to 'National Cuisine', 
                         current_year 'Year of the episode'
@@ -26,9 +20,9 @@ FROM cooks
 JOIN cooks_recipes_per_episode USING (cook_id)
 JOIN cooks_belongs_to_national_cuisine USING (cook_id)
 JOIN recipe USING (rec_name)
-WHERE current_year=2020 AND type_of_national_cuisine_that_belongs_to='Mordovian' -- possible index and below as well
+WHERE current_year=2020 AND type_of_national_cuisine_that_belongs_to='Mordovian'
 AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
--- If we do not want that we can comment it out. 
+-- If we do not want that, then we can comment it out. 
 -- Then the query would find any cook that belongs to this national cuisine and participated to an episode that year, even if
 -- the cook represented another national cuisine.
 ;
@@ -75,7 +69,6 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(cook_id) apps_count
         
 
 -- 3.6
--- ++++ force index
 SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
 FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
@@ -101,7 +94,6 @@ HAVING Number_of_Appearances +5 <= (
 	FROM cooks_apps);
 
 -- 3.8
--- ++++++ force index
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
 	FROM cooks_recipes_per_episode
@@ -226,7 +218,7 @@ WHERE avg_level = (
 -- 3 στον Α Μάγειρα
 -- 4 στον Βοηθό Σεφ
 -- 5 στον Σεφ
--- create index cook_category_idx on cooks (cook_category);
+
 -- explain format=json
 WITH level_of_eps AS (
 	SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
@@ -289,7 +281,7 @@ WHERE name_of_food_group NOT IN(
 	SELECT name_of_food_group
 	FROM cooks_recipes_per_episode
 	JOIN recipe USING (rec_name)
-	JOIN ingredients ON name_of_main_ingredient=name_of_ingredient -- maybe trigger
+	JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
 	JOIN food_group USING (name_of_food_group)
 );
 

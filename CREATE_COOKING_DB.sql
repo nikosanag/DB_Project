@@ -137,7 +137,9 @@ CONSTRAINT f_key_cooks_belongs_to_national_cuisine_cooks FOREIGN KEY (cook_id) R
 
 CREATE TABLE episodes_per_year(
 current_year INT(11),
-episode_number INT(11),
+episode_number INT(11) CHECK(episode_number<=10 AND episode_number>0),
+image_of_episode VARCHAR(50) DEFAULT NULL,
+image_of_episode_desc VARCHAR(100) DEFAULT NULL,
 PRIMARY KEY(current_year,episode_number)
 );
 CREATE TABLE cooks_recipes_per_episode(
@@ -252,21 +254,21 @@ END;
 DELIMITER ;
 
 
-/*
-drop trigger ensure_main
-DELIMITER // 
-CREATE TRIGGER ensure_main AFTER INSERT ON recipe 
+DELIMITER //
+CREATE TRIGGER common_national_cuisine BEFORE INSERT ON cooks_recipes_per_episode
 FOR EACH ROW
 BEGIN
 
-     INSERT INTO needs_ingredient (name_of_ingredient,rec_name) 
-     VALUE (NEW.name_of_main_ingredient, NEW.rec_name);
+IF (SELECT national_cuisine
+	FROM recipe 
+    WHERE rec_name=NEW.rec_name AND national_cuisine IN (
+				SELECT type_of_national_cuisine_that_belongs_to FROM cooks_belongs_to_national_cuisine WHERE cook_id=NEW.cook_id
+                ) IS NULL)
+THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'Cook and recipe do not have a common national cuisine';
+END IF; 
 
 END;
 //
-DELIMITER ; 
-*/
-
-
+DELIMITER ;
  
  
