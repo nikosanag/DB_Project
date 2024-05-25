@@ -207,6 +207,9 @@ for _ in range(RECIPES):
 # -----------------------------------------------------------------------------------------------------
 
 
+#TODO NEEDS INGREDIENT BEFORE RECIPE
+#TODO EQUIPMENT, THEMATIC UNIT IN ER
+#TODO PICTURES IN EPISODES
 
 
 #------------------------------------------- NEEDS INGREDIENT -----------------------------------------

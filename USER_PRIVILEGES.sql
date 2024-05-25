@@ -1,5 +1,7 @@
-DROP ROLE cook_role;
-DROP USER Cook;
+DROP ROLE IF EXISTS cook_role;
+DROP USER IF EXISTS Cook;
+DROP ROLE IF EXISTS administrator_role;
+DROP USER IF EXISTS Administrator;
 DROP VIEW IF EXISTS recipes_assigned_to_cook;
 
 CREATE ROLE cook_role;
@@ -30,6 +32,15 @@ TO cook_role;
 
 CREATE USER Cook  
 IDENTIFIED BY 'cook'
-DEFAULT ROLE cook_role
+DEFAULT ROLE cook_role;
 
--- show privileges
+GRANT SELECT, SHOW VIEW, TRIGGER, LOCK TABLES, PROCESS, RELOAD, CREATE, ALTER, INSERT, UPDATE
+ON *
+TO administrator_role;
+FLUSH PRIVILEGES;
+
+CREATE USER Administrator  
+IDENTIFIED BY 'admin'
+-- DEFAULT ROLE administrator_role;
+
+
