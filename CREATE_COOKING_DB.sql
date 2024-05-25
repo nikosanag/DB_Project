@@ -142,25 +142,17 @@ image_of_episode VARCHAR(50) DEFAULT NULL,
 image_of_episode_desc VARCHAR(100) DEFAULT NULL,
 PRIMARY KEY(current_year,episode_number)
 );
+
 CREATE TABLE cooks_recipes_per_episode(
 current_year INT(11) ,
 episode_number INT(11) ,
 rec_name VARCHAR(50),
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id),
+PRIMARY KEY (current_year,episode_number,cook_id,rec_name),
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
 CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
 ); 
-
-CREATE TABLE judges (
-current_year INT(11) ,
-episode_number INT(11) ,
-cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id),
-CONSTRAINT f_key_judges_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
-CONSTRAINT f_key_judges_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
-);
 
 CREATE TABLE evaluation(
 current_year INT(11) ,
@@ -172,7 +164,6 @@ PRIMARY KEY (current_year,episode_number,contestant_id,judge_id),
 CONSTRAINT f_key_evaluation_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number),
 CONSTRAINT f_key_evaluation_cooks_contestant FOREIGN KEY (contestant_id) REFERENCES cooks(cook_id),
 CONSTRAINT f_key_evaluation_cooks_judge FOREIGN KEY (judge_id) REFERENCES cooks(cook_id),
-CONSTRAINT f_key_evaluation_judges FOREIGN KEY (current_year,episode_number,judge_id) REFERENCES judges(current_year,episode_number,cook_id),
 CONSTRAINT f_key_evaluation_cooks_recipes_per_episode FOREIGN KEY (current_year,episode_number,contestant_id) REFERENCES cooks_recipes_per_episode(current_year,episode_number,cook_id)
 );
 
@@ -195,6 +186,12 @@ cook_password VARCHAR(50),
 PRIMARY KEY (cook_id),
 CONSTRAINT f_key_cook_credentials_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
+
+
+
+
+
+-- Triggers
 
 DELIMITER //
 CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
@@ -271,4 +268,45 @@ END;
 //
 DELIMITER ;
  
- 
+DELIMITER //
+CREATE TRIGGER duplicate_national_cuisine BEFORE INSERT ON cooks_recipes_per_episode
+FOR EACH ROW
+BEGIN
+
+IF (SELECT national_cuisine
+	FROM recipe 
+    WHERE rec_name=NEW.rec_name AND national_cuisine IN (
+				SELECT national_cuisine FROM recipe WHERE rec_name=NEW.rec_name
+                ) IS NOT NULL)
+THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'Duplicate national cuisine';
+END IF; 
+
+END;
+//
+DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER more_than_10_cooks_recipes BEFORE INSERT ON cooks_recipes_per_episode
+FOR EACH ROW
+BEGIN
+
+IF (SELECT COUNT(*)
+	FROM cooks_recipes_per_episode
+    WHERE current_year=NEW.current_year AND episode_number=NEW.episode_number
+    )=10
+THEN SIGNAL sqlstate '45000' SET MESSAGE_TEXT = 'Exceeded maximum amount of cooks and recipes per episode';
+END IF; 
+
+END;
+//
+DELIMITER ;
+
+
+
+
+-- Indexes
+
+CREATE INDEX national_cuisine_idx ON recipe(national_cuisine);
+CREATE INDEX type_of_national_cuisine_that_belongs_to_idx ON cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to); 
+CREATE INDEX cook_category_idx on cooks (cook_category);
