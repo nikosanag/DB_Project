@@ -1,4 +1,3 @@
-import mysql.connector
 import random
 from faker import Faker
 from faker_food import FoodProvider
@@ -207,9 +206,6 @@ for _ in range(RECIPES):
 # -----------------------------------------------------------------------------------------------------
 
 
-#TODO NEEDS INGREDIENT BEFORE RECIPE
-#TODO EQUIPMENT, THEMATIC UNIT IN ER
-#TODO PICTURES IN EPISODES
 
 
 #------------------------------------------- NEEDS INGREDIENT -----------------------------------------
@@ -479,15 +475,6 @@ for i in range(INGREDIENTS):
   else:
     data_insertions += ';\n\n\n'
 
-# recipe
-data_insertions += "INSERT INTO recipe\nVALUES"
-for i in range(RECIPES):  
-  data_insertions += f'\n    ("{rec_name[i]}", "{rec_type[i]}", {level_of_diff[i]}, "{short_descr[i]}", {prep_time[i]}, {cooking_time[i]}, {portions[i]}, "{name_of_main_ingredient[i]}", {grams_of_fat_per_portion[i]}, {grams_of_carbohydrates_per_portion[i]}, {grams_of_proteins_per_portion[i]}, 0 ,"{recipe_belongs_to_national_cuisine[i]}", "{image_of_recipe[i]}", "{image_of_recipe_desc[i]}")'
-  if i < RECIPES - 1:
-    data_insertions += ','
-  else:
-    data_insertions += ';\n\n\n'
-
 # needs_ingredient
 data_insertions += "INSERT INTO needs_ingredient\nVALUES"
 for i in range(RECIPES):
@@ -498,6 +485,15 @@ for i in range(RECIPES):
       data_insertions += ','
     else:
       data_insertions += ';\n\n\n'
+
+# recipe
+data_insertions += "INSERT INTO recipe\nVALUES"
+for i in range(RECIPES):  
+  data_insertions += f'\n    ("{rec_name[i]}", "{rec_type[i]}", {level_of_diff[i]}, "{short_descr[i]}", {prep_time[i]}, {cooking_time[i]}, {portions[i]}, "{name_of_main_ingredient[i]}", {grams_of_fat_per_portion[i]}, {grams_of_carbohydrates_per_portion[i]}, {grams_of_proteins_per_portion[i]}, 0 ,"{recipe_belongs_to_national_cuisine[i]}", "{image_of_recipe[i]}", "{image_of_recipe_desc[i]}")'
+  if i < RECIPES - 1:
+    data_insertions += ','
+  else:
+    data_insertions += ';\n\n\n'
 
 # type_of_meal
 data_insertions += "INSERT INTO type_of_meal\nVALUES"
@@ -614,7 +610,7 @@ for i in range(COOKS):
 data_insertions += 'INSERT INTO cook_credentials\n    VALUES (7, "Cook", "cook");'
 
 
-filename = 'INSERTIONS_SMALL_16.sql'
+filename = 'INSERTIONS_NEW.sql'
 
 with open(filename, 'w', encoding="utf-8") as script:
   script.write(data_insertions)
