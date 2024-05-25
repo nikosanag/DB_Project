@@ -137,7 +137,7 @@ SELECT DISTINCT rec_name,national_cuisine FROM recipe ;
                                                     
                                             
                                             -- επιλεγει judges μαγειρες που δεν συμμετειχαν στο τρεχων επεισοδιο και δεν εχουν συμμετασχει στα προηγουμενα 3 επεισοδια συνεχομενα 
-											INSERT INTO judges(current_year,episode_number,cook_id) SELECT DISTINCT count_years,count_episodes,cook_id FROM available_cooks WHERE (cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) ORDER BY RAND() LIMIT 3;
+											INSERT INTO judges(current_year,episode_number,cook_id) SELECT DISTINCT count_years,count_episodes,cook_id FROM available_cooks JOIN cooks USING(cook_id) WHERE (cook_category='Chef' AND cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) ORDER BY RAND() LIMIT 3;
                                             -- ανανεωνει το triggering number του μαγειρα που επιλεχθηκε
                                             UPDATE security_purposes_cooks SET triggering_number = triggering_number + 1 WHERE cook_id IN (SELECT cook_id FROM judges WHERE current_year = count_years AND episode_number = count_episodes); 
                                             -- διαγραφεται απο τον available_cooks για να μεινουν μονο οι μαγειρες που δεν επιλεχθηκαν καθολου στο παρον επεισοδιο με κανενα τροπο

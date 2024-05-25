@@ -6,6 +6,7 @@ JOIN cooks ON contestant_id=cook_id
 GROUP BY 1;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
+-- explain format=json
 SELECT national_cuisine 'National Cuisine', AVG(grade)
 FROM cooks_recipes_per_episode a
 JOIN recipe USING (rec_name)
@@ -13,6 +14,11 @@ JOIN evaluation b ON (a.current_year,a.episode_number,a.cook_id)=(b.current_year
 GROUP BY national_cuisine;
 
 -- 3.2
+create index national_cuisine_idx on recipe(national_cuisine);
+create index type_of_national_cuisine_that_belongs_to_idx on cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to);
+
+
+-- explain format=json
 SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
 						type_of_national_cuisine_that_belongs_to 'National Cuisine', 
                         current_year 'Year of the episode'
@@ -50,7 +56,8 @@ WHERE cook_id NOT IN (SELECT cook_id
 						FROM judges); 
                         
 -- 3.5
--- Το να τύχει ένας κριτής να συμμετάσχει πάνω από 3 φορές σε ένα έτος είναι μεν εφικτό, είναι δε αρκετά απίθανο.
+-- Το να τύχει ένας κριτής να συμμετάσχει πάνω από 3 φορές σε ένα έτος είναι μεν εφικτό, είναι δε αρκετά απίθανο,
+-- ειδικά αφού πρέπει το ίδιος έτος και ένας άλλος κριτής να συμμετέχει τον ίδιο αριθμό φορών.
 WITH appearances AS (
 	SELECT current_year , cook_id, COUNT(episode_number) Number_of_Appearances
 	FROM judges
@@ -176,13 +183,19 @@ DROP TABLE nat_cus_apps_per_2years;
 -- Find all possible couples (judge,contestant) with their respective avarage grade and choose top 5. 
 SELECT CONCAT(judge.name_of_cook,' ',judge.surname_of_cook) Judge_name,
 		CONCAT(cont.name_of_cook,' ',cont.surname_of_cook) Contestant_name, 
+		Avarage_grade
+        FROM (
+SELECT judge_id,
+		contestant_id, 
 		AVG(grade) Avarage_grade
 FROM evaluation
+GROUP BY contestant_id, judge_id
+ORDER BY Avarage_grade DESC
+LIMIT 5
+) contestant_judge_grade
 JOIN cooks cont ON cont.cook_id=contestant_id
 JOIN cooks judge ON judge.cook_id=judge_id
-GROUP BY Contestant_name, Judge_name
-ORDER BY Avarage_grade DESC
-LIMIT 5;
+;
 
 
 -- 3.12
@@ -213,6 +226,8 @@ WHERE avg_level = (
 -- 3 στον Α Μάγειρα
 -- 4 στον Βοηθό Σεφ
 -- 5 στον Σεφ
+create index cook_category_idx on cooks (cook_category);
+-- explain format=json
 WITH level_of_eps AS (
 	SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
 	FROM(
@@ -280,296 +295,11 @@ WHERE name_of_food_group NOT IN(
 
 
 
--- created a test database to test the queries without needing to worry about foreign key constraints
--- if you go further down you will find the exercise queries for the test database 
-
-DROP DATABASE IF EXISTS `test`;
-CREATE DATABASE `test`; 
-USE `test`;
-
-CREATE TABLE cooks_belongs_to_national_cuisine(
-cook_id INT(11) ,
-type_of_national_cuisine_that_belongs_to VARCHAR(50),
-PRIMARY KEY (cook_id,type_of_national_cuisine_that_belongs_to)
-);
-
-INSERT INTO cooks_belongs_to_national_cuisine
-VALUES (1,'Greek'),
-		(2,'Greek'),
-        (3,'French'),
-        (4,'Danish'),
-        (5,'French'),
-        (6,'Saudi Arabian'),
-        (7,'Italian'),
-		(10,'German');
-
-CREATE TABLE evaluation(
-current_year INT(11) ,
-episode_number INT(11) ,
-contestant_id INT(11) ,
-judge_id INT(11) , 
-grade INT(11) NOT NULL CHECK (grade IN (1,2,3,4,5)),
-PRIMARY KEY (current_year,episode_number,contestant_id,judge_id)
-);
-
-INSERT INTO evaluation
-VALUES (2000,1,1,10,4),
-		(2000,1,1,4,3),
-        (2000,1,1,5,4),
-        (2000,1,2,10,5),
-        (2000,1,2,4,3),
-        (2000,1,2,5,4),
-        (2000,1,3,10,1),
-        (2000,1,3,4,2),
-        (2000,1,3,5,3),
-        (2001,3,10,1,3),
-        (2001,3,10,6,2),
-        (2001,3,10,7,2),
-		(2001,2,10,1,3),
-        (2001,2,10,6,2),
-        (2001,2,10,7,5);
-
-CREATE TABLE cooks(
-cook_id INT(11),
-name_of_cook VARCHAR(50),
-surname_of_cook VARCHAR(50),
-phone_number VARCHAR(50),
-date_of_birth date,
-age INT(11),
-years_of_experience INT(11) CHECK(years_of_experience>0),
-cook_category VARCHAR(50) CHECK(cook_category IN ('C Cook', 'B Cook', 'A Cook', 'Chef', "Chef's Assistant")),
-PRIMARY KEY (cook_id)
-);
-
-INSERT INTO cooks
-VALUES (1,'George','Markoulidakis',NULL,'2003-12-30',21,10,'Chef'),
-		(2,'Nikos','Anagnostou',NULL,'2003-2-24',21,2,'C Cook'),
-        (3,'Ilias','Makras',NULL,'2003-5-23',21,3,'C Cook'),
-        (4,'Luke','Skywalker',NULL,NULL,80,50,'A Cook'),
-        (5,'Darth','Vader',NULL,NULL,104,40,'B Cook'),
-        (6,'Leia','Organa',NULL,NULL,80,60,"Chef's Assistant"),
-        (7,'Padme','Amidala',NULL,NULL,134,100,'Chef'),
-        (10,'Joe','Mama',NULL,NULL,75,46,"Chef's Assistant");
-
-
-CREATE TABLE episodes_per_year(
-current_year INT(11),
-episode_number INT(11),
-PRIMARY KEY(current_year,episode_number)
-);
-
-INSERT INTO episodes_per_year
-VALUES (2000,1),
-		(2001,1),
-		(2001,2),
-        (2001,3);
-        
-
-
-CREATE TABLE cooks_recipes_per_episode(
-current_year INT(11) ,
-episode_number INT(11) ,
-rec_name VARCHAR(50),
-cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id)
-); 
-
-
-
-INSERT INTO cooks_recipes_per_episode
-VALUES (2000,1,'Paidakia',1),
-		(2000,1,'Rice',2),
-        (2000,1,'Ice Cream',3),
-        (2001,1,'Chicken Soup',1),
-        (2001,2,'Joe Dada',10),
-		(2001,3,'Cookies',10);
-        
-CREATE TABLE judges (
-current_year INT(11) ,
-episode_number INT(11) ,
-cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id)
-);
-
-INSERT INTO judges
-VALUES (2000,1,10),
-		(2000,1,4),
-        (2000,1,5),
-        (2001,1,10),
-        (2001,1,6),
-        (2001,1,7),
-		(2001,2,1),
-        (2001,2,6),
-        (2001,2,7),
-        (2001,3,1),
-        (2001,3,6),
-        (2001,3,7);
-
-
-CREATE TABLE recipe(
-rec_name varchar(50), 
-rec_type varchar(50) DEFAULT 'Regular' CHECK(rec_type IN ('Pastry','Regular')),
-level_of_diff INT(11) CHECK (level_of_diff IN (1,2,3,4,5)),
-short_descr VARCHAR(50)  DEFAULT NULL,
-prep_time INT(11) CHECK (prep_time>0),
-cooking_time INT(11) CHECK (cooking_time>0),
-portions INT(11) CHECK (portions>0),
-name_of_main_ingredient VARCHAR(50) NOT NULL,
-grams_of_fat_per_portion INT(11) CHECK(grams_of_fat_per_portion>0),
-grams_of_carbohydrates_per_portion INT(11) CHECK(grams_of_carbohydrates_per_portion>0),
-grams_of_proteins_per_portion INT(11) CHECK(grams_of_proteins_per_portion>0),
-calories_per_portion INT(11),
-national_cuisine VARCHAR(50), 
-PRIMARY KEY (rec_name)
-);
-
-INSERT INTO recipe
-VALUES ('Paidakia',DEFAULT,3,'cooked children',15,45,4,'Meat',300,100,250,380,'Greek'),
-		('Rice',DEFAULT,1,'rice',5,30,3,'rice',50,300,20,80,'Greek'),
-        ('Ice Cream','Pastry',3,'2 Chocolate Ice Cream Balls',15,20,2,'Chocolate',100,50,10,180,'French'),
-        ('Chicken Soup',DEFAULT,3,NULL,25,45,1,'Chicken',200,150,150,250,'Greek'),
-        ('Joe Dada',DEFAULT,5,'cooked dada',60,45,1,'Murdered Dada',500,300,450,680,'German'),
-        ('Cookies',DEFAULT,4,NULL,25,25,10,'Chocolate',200,100,250,280,'German');
-
-CREATE TABLE food_group(
-name_of_food_group VARCHAR(50),
-description_of_food_group VARCHAR(50),
-recipe_description VARCHAR(50),
-PRIMARY KEY (name_of_food_group)
-);
-
-INSERT INTO food_group
-VALUES ('Pasta',NULL,NULL),
-		('Sweet',NULL,NULL),
-        ('Protein food',NULL,NULL),
-        ('People',NULL,NULL),
-        ('Fish',NULL,NULL),
-        ('Legumes',NULL,NULL);
-
-CREATE TABLE ingredients(
-name_of_ingredient VARCHAR(50),
-calories_per_100gr INT(11),
-name_of_food_group VARCHAR(50) NOT NULL,
-PRIMARY KEY (name_of_ingredient)
-);
-
-INSERT INTO ingredients
-VALUES ('Meat',200,'Protein food'),
-		('rice',100,'Pasta'),
-        ('Chocolate',120,'Sweet'),
-        ('Chicken',180,'Protein food'),
-        ('Murdered Dada',300,'People');
-
-CREATE TABLE thematic_unit(
-name_of_thematic_unit VARCHAR(50),
-description_of_thematic_unit VARCHAR(100),
-PRIMARY KEY (name_of_thematic_unit)
-);
-
-INSERT INTO thematic_unit
-VALUES ('Barbeque food',NULL),
-		('Chinese food', NULL),
-        ('Food to eat when sick', NULL),
-        ('Food for dessert', NULL),
-        ('Food for crying', NULL),
-        ('Food to get fat', NULL),
-        ('Food for cannibals', NULL),
-        ('Food for murderes', NULL);
-
-CREATE TABLE belongs_to_thematic_unit(
-rec_name VARCHAR(50),
-name_of_thematic_unit VARCHAR(50),
-PRIMARY KEY (rec_name,name_of_thematic_unit)
-);
-
-INSERT INTO belongs_to_thematic_unit
-VALUES ('Paidakia','Barbeque food'),
-		('Rice','Chinese food'),
-        ('Rice','Food to eat when sick'),
-        ('Ice Cream','Food for dessert'),
-        ('Ice Cream','Food for crying'),
-        ('Ice Cream','Food to get fat'),
-        ('Chicken Soup','Food to eat when sick'),
-        ('Joe Dada','Food for cannibals'),
-        ('Joe Dada','Food for murderes'),
-        ('Cookies','Food to get fat'),
-        ('Cookies','Food for dessert');
-        
-CREATE TABLE uses_equipment(
-rec_name VARCHAR(50),
-equipment_name VARCHAR(50),
-PRIMARY KEY (rec_name,equipment_name)
-);
-
-INSERT INTO uses_equipment
-VALUES ('Paidakia','Barbeque'),
-		('Rice','Pot'),
-        ('Ice Cream','Mixer'),
-        ('Chicken Soup','Pot'),
-        ('Joe Dada','Knife'),
-        ('Joe Dada','Gun'),
-        ('Joe Dada','Rope'),
-        ('Joe Dada','Barbeque'),
-        ('Cookies','Oven'),
-        ('Cookies','Mixer');
-        
-CREATE TABLE tags(
-tag_name VARCHAR(50),
-rec_name VARCHAR(50),
-PRIMARY KEY(tag_name,rec_name)
-);
-
-INSERT INTO tags
-VALUES ('Lunch','Paidakia'),
-		('Ideal for Easter','Paidakia'),
-        ('Barbeque dish','Paidakia'),
-        ('Test','Paidakia'),
-		('Chinese dish','Rice'),
-        ('Lunch','Rice'),
-        ('Dinner','Rice'),
-        ('Test','Rice'),
-        ('Sweet dish','Ice Cream'),
-        ('Ideal for Parties','Ice Cream'),
-        ('Ideal for Sad Moments','Ice Cream'),
-        ('Lunch','Chicken Soup'),
-        ('Inferior dish','Chicken Soup'),
-        ('Lunch','Joe Dada'),
-        ('Dinner','Joe Dada'),
-        ('Test','Joe Dada'),
-        ('Crazy dish','Joe Dada'),
-        ('Ideal for Parties','Joe Dada'),
-        ('Cold','Cookies'),
-        ('Ideal for Parties','Cookies'),
-        ('Sweet dish','Cookies');
-        
-
-CREATE TABLE tips(
-rec_name VARCHAR(50),
-tip VARCHAR(50),
-PRIMARY KEY (rec_name,tip)
-);
-
-INSERT INTO tips
-VALUES ('Rice','abc'),
-		('Rice','def'),
-        ('Rice','ghi');
-
-
-CREATE TABLE needs_ingredient(
-name_of_ingredient VARCHAR(50),
-rec_name VARCHAR(50),
-quantity VARCHAR(50),
-PRIMARY KEY (name_of_ingredient,rec_name)
-);
 
 
 
 
-        
 
-
-    
-     
 
                         
 
@@ -579,12 +309,12 @@ create index tag
 on tags (tag_name);
 
 EXPLAIN format = json
-SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
+SELECT STRAIGHT_JOIN a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
 FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
 	FROM cooks_recipes_per_episode competition
 	JOIN tags a USING (rec_name)
-	JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+	JOIN tags b /*IGNORE INDEX (PRIMARY,f_key_tags_recipe)*/ ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
 ) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
 							-- The couple is contained in the query as many times as it appears in the competition.
 GROUP BY a_tag_name, b_tag_name
