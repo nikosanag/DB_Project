@@ -192,8 +192,8 @@ CREATE TABLE cook_credentials(
 cook_id INT(11),
 cook_username VARCHAR(20),
 cook_password VARCHAR(50),
-PRIMARY KEY (cook_id)
-CONSTRAINT f_key_winners_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
+PRIMARY KEY (cook_id),
+CONSTRAINT f_key_cook_credentials_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id)
 );
 
 DELIMITER //
