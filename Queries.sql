@@ -46,22 +46,20 @@ WHERE recipe_count=(SELECT MAX(recipe_count) -- keep only the cooks with the hig
 -- 3.4
 SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Cooks that have never been a judge'
 FROM cooks
-WHERE cook_id NOT IN (SELECT cook_id
-						FROM judges); 
+WHERE cook_id NOT IN (SELECT judge_id
+						FROM evaluation);
                         
 -- 3.5
--- Το να τύχει ένας κριτής να συμμετάσχει πάνω από 3 φορές σε ένα έτος είναι μεν εφικτό, είναι δε αρκετά απίθανο,
--- ειδικά αφού πρέπει το ίδιος έτος και ένας άλλος κριτής να συμμετέχει τον ίδιο αριθμό φορών.
 WITH appearances AS (
-	SELECT current_year , cook_id, COUNT(episode_number) Number_of_Appearances
-	FROM judges
-	GROUP BY current_year, cook_id
+	SELECT current_year , judge_id, COUNT(DISTINCT episode_number) Number_of_Appearances
+	FROM evaluation
+	GROUP BY current_year, judge_id
 	HAVING Number_of_Appearances>3
-	ORDER BY current_year, Number_of_Appearances) -- this subquery finds the number appearances of its judge per year.
+    ) -- this subquery finds the number appearances per year, of its judge that has more than 3 per year.
 SELECT a.current_year, CONCAT(name_of_cook,' ',surname_of_cook) Cook_name, a.Number_of_Appearances
 FROM appearances a
-JOIN cooks USING (cook_id)
-JOIN ( SELECT current_year, Number_of_Appearances, COUNT(cook_id) apps_count
+JOIN cooks ON cook_id=judge_id
+JOIN ( SELECT current_year, Number_of_Appearances, COUNT(judge_id) apps_count
 		FROM appearances
 		GROUP BY current_year, Number_of_Appearances
 		HAVING apps_count>1) b USING (current_year, Number_of_Appearances) -- this subquery finds which number of appearances that appear more than once.
@@ -218,20 +216,18 @@ WHERE avg_level = (
 -- 3 στον Α Μάγειρα
 -- 4 στον Βοηθό Σεφ
 -- 5 στον Σεφ
-
--- explain format=json
 WITH level_of_eps AS (
 	SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
 	FROM(
 		SELECT current_year, episode_number, level_of_cook
 		FROM(
-			SELECT current_year, episode_number, cook_category
+			SELECT current_year, episode_number,cook_id, cook_category
 			FROM cooks_recipes_per_episode
 			JOIN cooks USING (cook_id)
 			UNION ALL
-			SELECT current_year, episode_number, cook_category
-			FROM judges
-			JOIN cooks USING (cook_id)
+			SELECT DISTINCT current_year, episode_number, judge_id,cook_category
+			FROM evaluation
+			JOIN cooks ON cook_id=judge_id
 		) cooks_categories -- This subquery finds the cook categories each episode contains (both judges and contestants)
 		JOIN(
 			SELECT 1 level_of_cook, 'C Cook' cook_category

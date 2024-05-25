@@ -14,9 +14,17 @@ DECLARE rec_name_to_enter VARCHAR(50);
 
 DELETE FROM winners;
 DELETE FROM evaluation;
-DELETE FROM judges;
 DELETE FROM cooks_recipes_per_episode;
 DELETE FROM episodes_per_year;
+
+CREATE TABLE judges (
+current_year INT(11) ,
+episode_number INT(11) ,
+cook_id INT(11),
+PRIMARY KEY (current_year,episode_number,cook_id),
+CONSTRAINT f_key_judges_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
+CONSTRAINT f_key_judges_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
+);
 
 CREATE TABLE possible_num(
 num INT(11),
@@ -200,6 +208,7 @@ DROP TABLE security_purposes_national_cuisine;
 DROP TABLE available_national_cuisines;
 DROP TABLE available_recipes;
 DROP TABLE available_cooks;
+DROP TABLE judges;
 END;
 //
 DELIMITER ;
