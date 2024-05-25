@@ -1,3 +1,0 @@
-CREATE INDEX national_cuisine_idx ON recipe(national_cuisine);
-CREATE INDEX type_of_national_cuisine_that_belongs_to_idx ON cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to); 
-CREATE INDEX cook_category_idx on cooks (cook_category);
