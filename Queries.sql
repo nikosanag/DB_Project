@@ -175,14 +175,12 @@ SELECT CONCAT(judge.name_of_cook,' ',judge.surname_of_cook) Judge_name,
 		CONCAT(cont.name_of_cook,' ',cont.surname_of_cook) Contestant_name, 
 		Avarage_grade
         FROM (
-SELECT judge_id,
-		contestant_id, 
-		AVG(grade) Avarage_grade
+SELECT judge_id, contestant_id, AVG(grade) Avarage_grade
 FROM evaluation
 GROUP BY contestant_id, judge_id
 ORDER BY Avarage_grade DESC
 LIMIT 5
-) contestant_judge_grade
+) contestant_judge_grade -- This subquery gets the job done. The outside query is to get the names instead of the ids.
 JOIN cooks cont ON cont.cook_id=contestant_id
 JOIN cooks judge ON judge.cook_id=judge_id
 ;
