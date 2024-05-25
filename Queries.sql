@@ -14,9 +14,9 @@ JOIN evaluation b ON (a.current_year,a.episode_number,a.cook_id)=(b.current_year
 GROUP BY national_cuisine;
 
 -- 3.2
-create index national_cuisine_idx on recipe(national_cuisine);
+/*create index national_cuisine_idx on recipe(national_cuisine);
 create index type_of_national_cuisine_that_belongs_to_idx on cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to);
-
+*/
 
 -- explain format=json
 SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
@@ -26,8 +26,8 @@ FROM cooks
 JOIN cooks_recipes_per_episode USING (cook_id)
 JOIN cooks_belongs_to_national_cuisine USING (cook_id)
 JOIN recipe USING (rec_name)
-WHERE current_year=2022 AND type_of_national_cuisine_that_belongs_to='Ainu' -- possible index and below as well
-AND national_cuisine='Ainu' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
+WHERE current_year=2020 AND type_of_national_cuisine_that_belongs_to='Mordovian' -- possible index and below as well
+AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
 -- If we do not want that we can comment it out. 
 -- Then the query would find any cook that belongs to this national cuisine and participated to an episode that year, even if
 -- the cook represented another national cuisine.
@@ -226,7 +226,7 @@ WHERE avg_level = (
 -- 3 στον Α Μάγειρα
 -- 4 στον Βοηθό Σεφ
 -- 5 στον Σεφ
-create index cook_category_idx on cooks (cook_category);
+-- create index cook_category_idx on cooks (cook_category);
 -- explain format=json
 WITH level_of_eps AS (
 	SELECT current_year, episode_number, SUM(level_of_cook) level_of_episode
@@ -293,7 +293,7 @@ WHERE name_of_food_group NOT IN(
 	JOIN food_group USING (name_of_food_group)
 );
 
-
+/*
 
 
 
@@ -314,7 +314,7 @@ FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
 	FROM cooks_recipes_per_episode competition
 	JOIN tags a USING (rec_name)
-	JOIN tags b /*IGNORE INDEX (PRIMARY,f_key_tags_recipe)*/ ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+	JOIN tags b /*IGNORE INDEX (PRIMARY,f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
 ) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
 							-- The couple is contained in the query as many times as it appears in the competition.
 GROUP BY a_tag_name, b_tag_name
