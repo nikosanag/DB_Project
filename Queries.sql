@@ -117,7 +117,6 @@ HAVING Number_of_Appearances +5 <= (
 	FROM cooks_apps);
 
 -- 3.8
-EXPLAIN format=json
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
 	FROM cooks_recipes_per_episode force index for group by (f_key_cooks_recipes_per_episode_episodes_per_year)
@@ -314,7 +313,6 @@ WHERE apps_num = (SELECT MAX(apps_num) FROM appearances)
 
 
 -- 3.15
-explain format=json
 SELECT name_of_food_group
 FROM food_group
 WHERE name_of_food_group NOT IN(
