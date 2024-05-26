@@ -15,14 +15,17 @@ JOIN evaluation b ON (a.current_year,a.episode_number,a.cook_id)=(b.current_year
 GROUP BY national_cuisine;
 
 -- 3.2
-SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
 						national_cuisine 'National Cuisine', 
                         current_year 'Year of the episode'
 FROM cooks
-JOIN cooks_recipes_per_episode USING (cook_id)
-JOIN recipe USING (rec_name)
-WHERE current_year=2020 
-AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
+JOIN (
+		SELECT DISTINCT cook_id, national_cuisine , current_year 
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING (rec_name)
+		WHERE current_year=2020 
+		AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
+		) tempor USING (cook_id)
 ;
 
 -- 3.3
