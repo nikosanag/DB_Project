@@ -1,26 +1,31 @@
 -- 3.1
 -- Μέση βαθμολογία ανά μάγειρα.
-SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Contestant Name', AVG(grade)
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Contestant Name', avg_grade 'Avarage Grade'
+FROM cooks
+JOIN(
+SELECT contestant_id, AVG(grade) avg_grade
 FROM evaluation
-JOIN cooks ON contestant_id=cook_id
-GROUP BY 1;
+GROUP BY 1) grade_of_cook ON contestant_id=cook_id;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
-SELECT national_cuisine 'National Cuisine', AVG(grade)
+SELECT national_cuisine 'National Cuisine', AVG(grade) 'Avarage Grade'
 FROM cooks_recipes_per_episode a
 JOIN recipe USING (rec_name)
 JOIN evaluation b ON (a.current_year,a.episode_number,a.cook_id)=(b.current_year,b.episode_number,b.contestant_id)
 GROUP BY national_cuisine;
 
 -- 3.2
-SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
 						national_cuisine 'National Cuisine', 
                         current_year 'Year of the episode'
 FROM cooks
-JOIN cooks_recipes_per_episode USING (cook_id)
-JOIN recipe USING (rec_name)
-WHERE current_year=2020 
-AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
+JOIN (
+		SELECT DISTINCT cook_id, national_cuisine , current_year 
+		FROM cooks_recipes_per_episode
+		JOIN recipe USING (rec_name)
+		WHERE current_year=2020 
+		AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
+		) tempor USING (cook_id)
 ;
 
 -- 3.3
@@ -118,8 +123,8 @@ HAVING Number_of_Appearances +5 <= (
 
 -- 3.8
 WITH amount AS (
-	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
-	FROM cooks_recipes_per_episode force index for group by (f_key_cooks_recipes_per_episode_episodes_per_year)
+	SELECT current_year, episode_number, COUNT(DISTINCT equipment_name) Amount_of_Equipment
+	FROM cooks_recipes_per_episode
 	JOIN uses_equipment USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
 SELECT current_year, episode_number, Amount_of_Equipment
@@ -136,7 +141,7 @@ WHERE Amount_of_Equipment= (
     -- Εναλλακτικό query plan 
 EXPLAIN
 WITH amount AS (
-	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
+	SELECT current_year, episode_number, COUNT(DISTINCT equipment_name) Amount_of_Equipment
 	FROM uses_equipment IGNORE INDEX(PRIMARY)
 	JOIN cooks_recipes_per_episode USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
