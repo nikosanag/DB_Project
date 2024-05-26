@@ -1,9 +1,11 @@
 -- 3.1
 -- Μέση βαθμολογία ανά μάγειρα.
-SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Contestant Name', AVG(grade) 'Avarage Grade'
+SELECT CONCAT(name_of_cook,' ',surname_of_cook) 'Contestant Name', avg_grade 'Avarage Grade'
+FROM cooks
+JOIN(
+SELECT contestant_id, AVG(grade) avg_grade
 FROM evaluation
-JOIN cooks ON contestant_id=cook_id
-GROUP BY 1;
+GROUP BY 1) grade_of_cook ON contestant_id=cook_id;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
 SELECT national_cuisine 'National Cuisine', AVG(grade) 'Avarage Grade'
