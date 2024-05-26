@@ -162,7 +162,9 @@ SELECT DISTINCT rec_name,national_cuisine FROM recipe ;
                                             AND crpe.episode_number = count_episodes;
                                             
 											INSERT INTO winners
-                                            SELECT count_years,count_episodes,cook_id,SUM(grade) total_grade, cook_category
+                                            SELECT count_years,count_episodes, cook_id
+                                            FROM(
+                                            SELECT cook_id,SUM(grade) total_grade
                                             FROM (
                                             SELECT contestant_id AS cook_id,grade
                                             FROM evaluation
@@ -181,7 +183,7 @@ SELECT DISTINCT rec_name,national_cuisine FROM recipe ;
 												) tempo USING (cook_category)
                                             GROUP BY cook_id
                                             ORDER BY total_grade DESC,level_of_cook DESC,RAND()
-                                            LIMIT 1
+                                            LIMIT 1) tempora
                                             ;
                                             
                                             -- οσοι εχουν μεινει στο available_cooks παει να πει οτι δεν συμμετειχαν οποτε το triggering number τους μπορει να γινει ξανα 0 
