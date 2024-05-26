@@ -122,6 +122,7 @@ HAVING Number_of_Appearances +5 <= (
 	FROM cooks_apps);
 
 -- 3.8
+-- Μετράμε πόσα διαφορετικά εξαρτήματα χρησιμοποιούνται σε κάθε επεισόδιο.
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(DISTINCT equipment_name) Amount_of_Equipment
 	FROM cooks_recipes_per_episode
