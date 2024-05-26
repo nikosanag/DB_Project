@@ -5,6 +5,7 @@ DROP USER IF EXISTS Administrator;
 DROP VIEW IF EXISTS recipes_assigned_to_cook;
 
 CREATE ROLE cook_role;
+CREATE ROLE administrator_role;
 
 GRANT SELECT 
 ON *
@@ -17,7 +18,7 @@ TO cook_role;
 CREATE VIEW recipes_assigned_to_cook AS
 SELECT *
 FROM recipe
-WHERE rec_name = (
+WHERE rec_name IN (
 	SELECT rec_name 
     FROM cooks_recipes_per_episode
     WHERE cook_id = (
@@ -34,13 +35,17 @@ CREATE USER Cook
 IDENTIFIED BY 'cook'
 DEFAULT ROLE cook_role;
 
-GRANT SELECT, SHOW VIEW, TRIGGER, LOCK TABLES, PROCESS, RELOAD, CREATE, ALTER, INSERT, UPDATE
+GRANT PROCESS, RELOAD
+ON *.*
+TO administrator_role;
+
+GRANT SELECT, SHOW VIEW, TRIGGER, LOCK TABLES, CREATE, ALTER, INSERT, UPDATE
 ON *
 TO administrator_role;
-FLUSH PRIVILEGES;
 
 CREATE USER Administrator  
 IDENTIFIED BY 'admin'
--- DEFAULT ROLE administrator_role;
+DEFAULT ROLE administrator_role;
 
+select * from cooks_recipes_per_episode
 
