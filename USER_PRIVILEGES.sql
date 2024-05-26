@@ -54,7 +54,7 @@ WHERE rec_name IN (
     )
 );	
 
-GRANT UPDATE 
+GRANT SELECT, UPDATE 
 ON cooking.recipes_assigned_to_cook
 TO cook_role;
 
