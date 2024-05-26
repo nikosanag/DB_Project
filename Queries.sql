@@ -6,7 +6,6 @@ JOIN cooks ON contestant_id=cook_id
 GROUP BY 1;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
-explain format=json
 SELECT national_cuisine 'National Cuisine', AVG(grade)
 FROM cooks_recipes_per_episode a
 JOIN recipe USING (rec_name)
@@ -64,13 +63,41 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(judge_id) apps_count
         
 
 -- 3.6
-explain format=json
 SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
 FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
 	FROM cooks_recipes_per_episode competition
 	JOIN tags a USING (rec_name)
 	JOIN tags b ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
+							-- The couple is contained in the query as many times as it appears in the competition.
+GROUP BY a_tag_name, b_tag_name
+ORDER BY Tag_Couple_Appearances DESC
+LIMIT 3;
+
+-- Εναλλακτικό query plan #1
+EXPLAIN format = json
+SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
+FROM(
+	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
+	FROM cooks_recipes_per_episode competition
+	JOIN tags a USING (rec_name)
+	JOIN tags b IGNORE INDEX (f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
+							-- The couple is contained in the query as many times as it appears in the competition.
+GROUP BY a_tag_name, b_tag_name
+ORDER BY Tag_Couple_Appearances DESC
+LIMIT 3;
+
+
+-- Εναλλακτικό query plan #2
+EXPLAIN format = json
+SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
+FROM(
+	SELECT STRAIGHT_JOIN a.tag_name a_tag_name, b.tag_name b_tag_name
+	FROM cooks_recipes_per_episode competition
+	JOIN tags a USING (rec_name)
+	JOIN tags b IGNORE INDEX (f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
 ) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
 							-- The couple is contained in the query as many times as it appears in the competition.
 GROUP BY a_tag_name, b_tag_name
@@ -90,10 +117,10 @@ HAVING Number_of_Appearances +5 <= (
 	FROM cooks_apps);
 
 -- 3.8
-explain format=json
+EXPLAIN format=json
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
-	FROM cooks_recipes_per_episode
+	FROM cooks_recipes_per_episode force index for group by (f_key_cooks_recipes_per_episode_episodes_per_year)
 	JOIN uses_equipment USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
 SELECT current_year, episode_number, Amount_of_Equipment
@@ -269,6 +296,7 @@ WHERE apps_num = (SELECT MAX(apps_num) FROM appearances)
 
 
 -- 3.15
+explain format=json
 SELECT name_of_food_group
 FROM food_group
 WHERE name_of_food_group NOT IN(
@@ -290,29 +318,15 @@ WHERE name_of_food_group NOT IN(
                         
 
 
--- 3.6
-
-EXPLAIN format = json
-SELECT STRAIGHT_JOIN a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
-FROM(
-	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
-	FROM cooks_recipes_per_episode competition
-	JOIN tags a USING (rec_name)
-	JOIN tags b IGNORE INDEX (f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
-) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
-							-- The couple is contained in the query as many times as it appears in the competition.
-GROUP BY a_tag_name, b_tag_name
-ORDER BY Tag_Couple_Appearances DESC
-LIMIT 3;
 
 
 
 -- 3.8
-explain format=json
+explain -- format=json
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
-	FROM cooks_recipes_per_episode
-	JOIN uses_equipment USING (rec_name)
+	FROM uses_equipment
+	JOIN cooks_recipes_per_episode FORCE INDEX FOR GROUP BY (current_year,episode_number) USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
 SELECT current_year, episode_number, Amount_of_Equipment
 FROM amount

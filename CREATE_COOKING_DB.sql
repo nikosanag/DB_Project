@@ -237,6 +237,25 @@ END;
 //
 DELIMITER ;
 
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe_2 BEFORE INSERT ON recipe
+FOR EACH ROW
+BEGIN
+
+SET NEW.calories_per_portion = (
+	SELECT SUM(val)
+    FROM(
+		SELECT calories_per_100gr*quantity/100/NEW.portions val
+		FROM ingredients 
+        JOIN needs_ingredient USING (name_of_ingredient)
+		WHERE NEW.rec_name = rec_name
+        ) temporary
+);
+
+END;
+//
+DELIMITER ;
+
 
 DELIMITER //
 CREATE TRIGGER calculates_age_on_insert BEFORE INSERT ON cooks
@@ -307,5 +326,4 @@ DELIMITER ;
 -- Indexes
 
 CREATE INDEX national_cuisine_idx ON recipe(national_cuisine);
--- CREATE INDEX type_of_national_cuisine_that_belongs_to_idx ON cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to); 
 CREATE INDEX cook_category_idx ON cooks (cook_category);
