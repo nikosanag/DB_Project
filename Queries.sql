@@ -6,6 +6,7 @@ JOIN cooks ON contestant_id=cook_id
 GROUP BY 1;
 
 -- Μέση βαθμολογία ανά εθνική κουζίνα.
+explain format=json
 SELECT national_cuisine 'National Cuisine', AVG(grade)
 FROM cooks_recipes_per_episode a
 JOIN recipe USING (rec_name)
@@ -14,17 +15,13 @@ GROUP BY national_cuisine;
 
 -- 3.2
 SELECT DISTINCT CONCAT(name_of_cook,' ',surname_of_cook) 'Cook name', 
-						type_of_national_cuisine_that_belongs_to 'National Cuisine', 
+						national_cuisine 'National Cuisine', 
                         current_year 'Year of the episode'
 FROM cooks
 JOIN cooks_recipes_per_episode USING (cook_id)
-JOIN cooks_belongs_to_national_cuisine USING (cook_id)
 JOIN recipe USING (rec_name)
-WHERE current_year=2020 AND type_of_national_cuisine_that_belongs_to='Mordovian'
+WHERE current_year=2020 
 AND national_cuisine='Mordovian' -- This condition is to check if the cook actually represents this national cuisine on an episode. 
--- If we do not want that, then we can comment it out. 
--- Then the query would find any cook that belongs to this national cuisine and participated to an episode that year, even if
--- the cook represented another national cuisine.
 ;
 
 -- 3.3
@@ -67,6 +64,7 @@ JOIN ( SELECT current_year, Number_of_Appearances, COUNT(judge_id) apps_count
         
 
 -- 3.6
+explain format=json
 SELECT a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
 FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
@@ -92,6 +90,7 @@ HAVING Number_of_Appearances +5 <= (
 	FROM cooks_apps);
 
 -- 3.8
+explain format=json
 WITH amount AS (
 	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
 	FROM cooks_recipes_per_episode
@@ -237,8 +236,9 @@ WITH level_of_eps AS (
 			SELECT 4 level_of_cook, "Chef's Assistant" cook_category
 			UNION
 			SELECT 5 level_of_cook, 'Chef' cook_category
-		) temp USING (cook_category) -- this subquery maps each cook category to an integer representing the level of the cook.
-	) temp1
+		) category_to_level USING (cook_category) 
+        -- this subquery maps each cook category to an integer representing the level of the cook.
+	) levels_for_each_episode
 	GROUP BY current_year, episode_number
 ) -- This subquery finds the level of each episode.
 SELECT current_year, episode_number, level_of_episode
@@ -279,7 +279,7 @@ WHERE name_of_food_group NOT IN(
 	JOIN food_group USING (name_of_food_group)
 );
 
-/*
+
 
 
 
@@ -291,8 +291,6 @@ WHERE name_of_food_group NOT IN(
 
 
 -- 3.6
-create index tag
-on tags (tag_name);
 
 EXPLAIN format = json
 SELECT STRAIGHT_JOIN a_tag_name, b_tag_name, COUNT(*) Tag_Couple_Appearances
@@ -300,15 +298,13 @@ FROM(
 	SELECT a.tag_name a_tag_name, b.tag_name b_tag_name
 	FROM cooks_recipes_per_episode competition
 	JOIN tags a USING (rec_name)
-	JOIN tags b /*IGNORE INDEX (PRIMARY,f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
+	JOIN tags b IGNORE INDEX (f_key_tags_recipe) ON a.rec_name=b.rec_name AND a.tag_name<b.tag_name
 ) possible_couples_of_tags -- this subquery finds the possible couples of tags that appeared in the competition. 
 							-- The couple is contained in the query as many times as it appears in the competition.
 GROUP BY a_tag_name, b_tag_name
 ORDER BY Tag_Couple_Appearances DESC
 LIMIT 3;
 
-alter table tags
-drop index tag;
 
 
 -- 3.8

@@ -147,7 +147,7 @@ current_year INT(11) ,
 episode_number INT(11) ,
 rec_name VARCHAR(50),
 cook_id INT(11),
-PRIMARY KEY (current_year,episode_number,cook_id,rec_name),
+PRIMARY KEY (current_year,episode_number,cook_id),
 CONSTRAINT f_key_cooks_recipes_per_episode_cooks FOREIGN KEY (cook_id) REFERENCES cooks(cook_id), 
 CONSTRAINT f_key_cooks_recipes_per_episode_recipe FOREIGN KEY (rec_name) REFERENCES recipe(rec_name), 
 CONSTRAINT f_key_cooks_recipes_per_episode_episodes_per_year FOREIGN KEY (current_year,episode_number) REFERENCES episodes_per_year(current_year,episode_number)
@@ -307,5 +307,5 @@ DELIMITER ;
 -- Indexes
 
 CREATE INDEX national_cuisine_idx ON recipe(national_cuisine);
-CREATE INDEX type_of_national_cuisine_that_belongs_to_idx ON cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to); 
-CREATE INDEX cook_category_idx on cooks (cook_category);
+-- CREATE INDEX type_of_national_cuisine_that_belongs_to_idx ON cooks_belongs_to_national_cuisine(type_of_national_cuisine_that_belongs_to); 
+CREATE INDEX cook_category_idx ON cooks (cook_category);
