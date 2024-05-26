@@ -132,6 +132,24 @@ WHERE Amount_of_Equipment= (
     -- The overall query could find more than 1 episode in case of a draw. 
     -- (More than 1 episode could have the max amount of equipment)
     ;
+    
+    
+    -- Εναλλακτικό query plan 
+explain
+WITH amount AS (
+	SELECT STRAIGHT_JOIN current_year, episode_number, COUNT(*) Amount_of_Equipment
+	FROM uses_equipment
+	JOIN cooks_recipes_per_episode USING (rec_name)
+	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
+SELECT current_year, episode_number, Amount_of_Equipment
+FROM amount
+WHERE Amount_of_Equipment= (
+	SELECT MAX(Amount_of_Equipment)
+	FROM amount
+    ) -- This subquery finds the max amount of equipment an episode any had.
+    -- The overall query could find more than 1 episode in case of a draw. 
+    -- (More than 1 episode could have the max amount of equipment)
+   ; 
 
 -- 3.9
 SELECT current_year, AVG(grams_of_carbohydrates) 'Avarage Grams of Carbohydrates per Year'
@@ -306,37 +324,6 @@ WHERE name_of_food_group NOT IN(
 	JOIN ingredients ON name_of_main_ingredient=name_of_ingredient
 	JOIN food_group USING (name_of_food_group)
 );
-
-
-
-
-
-
-
-
-
-                        
-
-
-
-
-
--- 3.8
-explain -- format=json
-WITH amount AS (
-	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
-	FROM uses_equipment
-	JOIN cooks_recipes_per_episode FORCE INDEX FOR GROUP BY (current_year,episode_number) USING (rec_name)
-	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
-SELECT current_year, episode_number, Amount_of_Equipment
-FROM amount
-WHERE Amount_of_Equipment= (
-	SELECT MAX(Amount_of_Equipment)
-	FROM amount
-    ) -- This subquery finds the max amount of equipment an episode any had.
-    -- The overall query could find more than 1 episode in case of a draw. 
-    -- (More than 1 episode could have the max amount of equipment)
-   ; 
 
 
 
