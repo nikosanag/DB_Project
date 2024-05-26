@@ -193,6 +193,17 @@ CONSTRAINT f_key_cook_credentials_cooks FOREIGN KEY (cook_id) REFERENCES cooks(c
 -- Triggers
 
 DELIMITER //
+CREATE TRIGGER calculates_age_on_insert BEFORE INSERT ON cooks
+FOR EACH ROW
+BEGIN
+
+SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
+
+END;
+//
+DELIMITER ;
+
+DELIMITER //
 CREATE TRIGGER if_age_needs_to_be_changed BEFORE UPDATE ON cooks
 FOR EACH ROW 
 BEGIN
@@ -222,23 +233,7 @@ DELIMITER ;
 
 
 DELIMITER // 
-CREATE TRIGGER calculate_calories_for_recipe AFTER INSERT ON needs_ingredient
-FOR EACH ROW
-BEGIN
-
-UPDATE recipe
-SET calories_per_portion = calories_per_portion + (
-	SELECT calories_per_100gr*NEW.quantity/100/portions 
-    FROM ingredients 
-    WHERE name_of_ingredient = NEW.name_of_ingredient)
-WHERE rec_name = NEW.rec_name;
-
-END;
-//
-DELIMITER ;
-
-DELIMITER // 
-CREATE TRIGGER calculate_calories_for_recipe_2 BEFORE INSERT ON recipe
+CREATE TRIGGER calculate_calories_for_recipe_on_insert_recipe BEFORE INSERT ON recipe
 FOR EACH ROW
 BEGIN
 
@@ -256,17 +251,22 @@ END;
 //
 DELIMITER ;
 
-
-DELIMITER //
-CREATE TRIGGER calculates_age_on_insert BEFORE INSERT ON cooks
+DELIMITER // 
+CREATE TRIGGER calculate_calories_for_recipe_on_insert_needs_ingredient AFTER INSERT ON needs_ingredient
 FOR EACH ROW
 BEGIN
 
-SET NEW.age =  TIMESTAMPDIFF(YEAR,NEW.date_of_birth,CURDATE()); 
+UPDATE recipe
+SET calories_per_portion = calories_per_portion + (
+	SELECT calories_per_100gr*NEW.quantity/100/portions 
+    FROM ingredients 
+    WHERE name_of_ingredient = NEW.name_of_ingredient)
+WHERE rec_name = NEW.rec_name;
 
 END;
 //
 DELIMITER ;
+
 
 
 DELIMITER //
