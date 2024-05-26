@@ -134,10 +134,10 @@ WHERE Amount_of_Equipment= (
     
     
     -- Εναλλακτικό query plan 
-explain
+EXPLAIN
 WITH amount AS (
-	SELECT STRAIGHT_JOIN current_year, episode_number, COUNT(*) Amount_of_Equipment
-	FROM uses_equipment
+	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
+	FROM uses_equipment IGNORE INDEX(PRIMARY)
 	JOIN cooks_recipes_per_episode USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
 SELECT current_year, episode_number, Amount_of_Equipment
