@@ -123,7 +123,7 @@ HAVING Number_of_Appearances +5 <= (
 
 -- 3.8
 WITH amount AS (
-	SELECT current_year, episode_number, COUNT(*) Amount_of_Equipment
+	SELECT current_year, episode_number, COUNT(DISTINCT equipment_name) Amount_of_Equipment
 	FROM cooks_recipes_per_episode
 	JOIN uses_equipment USING (rec_name)
 	GROUP BY current_year, episode_number) -- This subquery finds the amount of equipment for each episode.
