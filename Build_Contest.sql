@@ -115,7 +115,7 @@ SELECT DISTINCT rec_name,national_cuisine FROM recipe ;
                                                     (
                                                     SELECT cook_id FROM available_cooks 
                                                     WHERE 
-                                                    (cook_id IN (SELECT cook_id FROM security_purposes_national_cuisine WHERE triggering_number<3)) 
+                                                    (cook_id IN (SELECT cook_id FROM security_purposes_cooks WHERE triggering_number<3)) 
 													AND ((cook_id,national_cuisine_to_enter) IN (SELECT cook_id,national_cuisine FROM available_cooks))
                                                     ORDER BY RAND()
                                                     LIMIT 1
